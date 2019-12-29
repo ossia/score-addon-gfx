@@ -1,13 +1,13 @@
 #pragma once
+#include <score/plugins/application/GUIApplicationPlugin.hpp>
+#include <score/plugins/documentdelegate/plugin/DocumentPlugin.hpp>
+
 #include <Gfx/GfxContext.hpp>
 #include <Gfx/GfxExec.hpp>
-#include <score/plugins/documentdelegate/plugin/DocumentPlugin.hpp>
-#include <score/plugins/application/GUIApplicationPlugin.hpp>
 
 namespace Gfx
 {
-class DocumentPlugin final
-    : public score::DocumentPlugin
+class DocumentPlugin final : public score::DocumentPlugin
 {
 public:
   DocumentPlugin(
@@ -15,7 +15,6 @@ public:
       Id<score::DocumentPlugin> id,
       QObject* parent);
   ~DocumentPlugin() override;
-
 
   gfx_window_context context;
   gfx_exec_context exec{context};

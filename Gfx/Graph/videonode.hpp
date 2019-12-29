@@ -10,7 +10,8 @@ struct YUV420Node : Node
 {
   std::shared_ptr<video_decoder> decoder;
 
-  // Taken from https://www.roxlu.com/2014/039/decoding-h264-and-yuv420p-playback
+  // Taken from
+  // https://www.roxlu.com/2014/039/decoding-h264-and-yuv420p-playback
   static const constexpr auto filter = R"_(#version 450
 
   layout(std140, binding = 0) uniform buf {
@@ -46,8 +47,7 @@ struct YUV420Node : Node
   })_";
 
   YUV420Node(std::shared_ptr<video_decoder> dec)
-    : Node{filter}
-    , decoder{std::move(dec)}
+      : Node{filter}, decoder{std::move(dec)}
   {
     output.push_back(new Port{this, {}, Types::Image, {}});
   }
@@ -69,11 +69,11 @@ struct YUV420Node : Node
         tex->build();
 
         auto sampler = rhi.newSampler(
-                         QRhiSampler::Linear,
-                         QRhiSampler::Linear,
-                         QRhiSampler::None,
-                         QRhiSampler::ClampToEdge,
-                         QRhiSampler::ClampToEdge);
+            QRhiSampler::Linear,
+            QRhiSampler::Linear,
+            QRhiSampler::None,
+            QRhiSampler::ClampToEdge,
+            QRhiSampler::ClampToEdge);
         sampler->build();
         m_samplers.push_back({sampler, tex});
       }
@@ -81,15 +81,15 @@ struct YUV420Node : Node
       // U
       {
         auto tex = rhi.newTexture(
-                     QRhiTexture::R8, {w / 2, h / 2}, 1, QRhiTexture::Flag{});
+            QRhiTexture::R8, {w / 2, h / 2}, 1, QRhiTexture::Flag{});
         tex->build();
 
         auto sampler = rhi.newSampler(
-                         QRhiSampler::Linear,
-                         QRhiSampler::Linear,
-                         QRhiSampler::None,
-                         QRhiSampler::ClampToEdge,
-                         QRhiSampler::ClampToEdge);
+            QRhiSampler::Linear,
+            QRhiSampler::Linear,
+            QRhiSampler::None,
+            QRhiSampler::ClampToEdge,
+            QRhiSampler::ClampToEdge);
         sampler->build();
         m_samplers.push_back({sampler, tex});
       }
@@ -97,21 +97,22 @@ struct YUV420Node : Node
       // V
       {
         auto tex = rhi.newTexture(
-                     QRhiTexture::R8, {w / 2, h / 2}, 1, QRhiTexture::Flag{});
+            QRhiTexture::R8, {w / 2, h / 2}, 1, QRhiTexture::Flag{});
         tex->build();
 
         auto sampler = rhi.newSampler(
-                         QRhiSampler::Linear,
-                         QRhiSampler::Linear,
-                         QRhiSampler::None,
-                         QRhiSampler::ClampToEdge,
-                         QRhiSampler::ClampToEdge);
+            QRhiSampler::Linear,
+            QRhiSampler::Linear,
+            QRhiSampler::None,
+            QRhiSampler::ClampToEdge,
+            QRhiSampler::ClampToEdge);
         sampler->build();
         m_samplers.push_back({sampler, tex});
       }
     }
 
-    void customUpdate(Renderer& renderer, QRhiResourceUpdateBatch& res) override
+    void
+    customUpdate(Renderer& renderer, QRhiResourceUpdateBatch& res) override
     {
       auto& decoder = *static_cast<const YUV420Node&>(node).decoder;
       if (auto frame = decoder.dequeue_frame())
@@ -174,7 +175,6 @@ struct YUV420Node : Node
 
   virtual ~YUV420Node() {}
 
-
   RenderedNode* createRenderer() const noexcept override
   {
     return new Rendered{*this};
@@ -214,21 +214,22 @@ struct RGB0Node : Node
 
       {
         auto tex = rhi.newTexture(
-                     QRhiTexture::RGBA8, QSize{w, h}, 1, QRhiTexture::Flag{});
+            QRhiTexture::RGBA8, QSize{w, h}, 1, QRhiTexture::Flag{});
         tex->build();
 
         auto sampler = rhi.newSampler(
-                         QRhiSampler::Linear,
-                         QRhiSampler::Linear,
-                         QRhiSampler::None,
-                         QRhiSampler::ClampToEdge,
-                         QRhiSampler::ClampToEdge);
+            QRhiSampler::Linear,
+            QRhiSampler::Linear,
+            QRhiSampler::None,
+            QRhiSampler::ClampToEdge,
+            QRhiSampler::ClampToEdge);
         sampler->build();
         m_samplers.push_back({sampler, tex});
       }
     }
 
-    void customUpdate(Renderer& renderer, QRhiResourceUpdateBatch& res) override
+    void
+    customUpdate(Renderer& renderer, QRhiResourceUpdateBatch& res) override
     {
       auto& decoder = *static_cast<const RGB0Node&>(node).decoder;
 
@@ -257,20 +258,15 @@ struct RGB0Node : Node
   };
 
   RGB0Node(std::shared_ptr<video_decoder> dec)
-    : Node{filter}
-    , decoder{std::move(dec)}
+      : Node{filter}, decoder{std::move(dec)}
   {
     output.push_back(new Port{this, {}, Types::Image, {}});
   }
 
-  virtual ~RGB0Node()
-  {
-
-  }
+  virtual ~RGB0Node() {}
 
   RenderedNode* createRenderer() const noexcept override
   {
     return new Rendered{*this};
   }
 };
-

@@ -1,21 +1,22 @@
 #include "GfxDevice.hpp"
-#include <Gfx/GfxApplicationPlugin.hpp>
-
-#include <ossia-qt/name_utils.hpp>
 
 #include <State/Widgets/AddressFragmentLineEdit.hpp>
 
+#include <ossia-qt/name_utils.hpp>
+
 #include <QFormLayout>
+
+#include <Gfx/GfxApplicationPlugin.hpp>
 #include <wobjectimpl.h>
 W_OBJECT_IMPL(Gfx::GfxDevice)
 
 namespace Gfx
 {
 
-GfxDevice::GfxDevice(const Device::DeviceSettings& settings,
-                     const score::DocumentContext& ctx)
-    : DeviceInterface{settings}
-    , m_ctx{ctx}
+GfxDevice::GfxDevice(
+    const Device::DeviceSettings& settings,
+    const score::DocumentContext& ctx)
+    : DeviceInterface{settings}, m_ctx{ctx}
 {
   m_capas.canAddNode = false;
   m_capas.canRemoveNode = false;
@@ -76,13 +77,11 @@ bool GfxDevice::reconnect()
   try
   {
     auto plug = m_ctx.findPlugin<DocumentPlugin>();
-    if(plug)
+    if (plug)
     {
       m_protocol = new gfx_protocol{plug->exec};
       m_dev = std::make_unique<gfx_device>(
-          std::unique_ptr<ossia::net::protocol_base>(m_protocol),
-          "gfx");
-
+          std::unique_ptr<ossia::net::protocol_base>(m_protocol), "gfx");
     }
     // TODOengine->reload(&proto);
 
@@ -142,7 +141,6 @@ const Device::DeviceSettings& GfxProtocolFactory::defaultSettings() const
   }();
   return settings;
 }
-
 
 Device::AddressDialog* GfxProtocolFactory::makeAddAddressDialog(
     const Device::DeviceInterface& dev,

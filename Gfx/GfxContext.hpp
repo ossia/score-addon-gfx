@@ -1,11 +1,12 @@
 #pragma once
 #include <ossia/dataflow/port.hpp>
 #include <ossia/dataflow/token_request.hpp>
+#include <ossia/detail/flicks.hpp>
 #include <ossia/detail/hash_map.hpp>
+#include <ossia/network/value/value_conversion.hpp>
+
 #include <Gfx/Graph/window.hpp>
 #include <concurrentqueue.h>
-#include <ossia/network/value/value_conversion.hpp>
-#include <ossia/detail/flicks.hpp>
 namespace Gfx
 {
 
@@ -14,9 +15,18 @@ struct port_index
   int32_t node{};
   int32_t port{};
 
-  auto operator==(port_index other) const noexcept { return node == other.node && port == other.port; }
-  auto operator!=(port_index other) const noexcept { return node != other.node || port != other.port; }
-  auto operator<(port_index other) const noexcept { return node < other.node || (node == other.node && port < other.port); }
+  auto operator==(port_index other) const noexcept
+  {
+    return node == other.node && port == other.port;
+  }
+  auto operator!=(port_index other) const noexcept
+  {
+    return node != other.node || port != other.port;
+  }
+  auto operator<(port_index other) const noexcept
+  {
+    return node < other.node || (node == other.node && port < other.port);
+  }
 };
 
 using gfx_input = std::variant<ossia::value, ossia::audio_vector>;
@@ -40,7 +50,7 @@ struct gfx_view_node
     UBO.time = tk.date.impl / ossia::flicks_per_second<double>;
     UBO.timeDelta = UBO.time - prev_time;
 
-    if(tk.parent_duration.impl > 0)
+    if (tk.parent_duration.impl > 0)
       UBO.progress = tk.date.impl / double(tk.parent_duration.impl);
     else
       UBO.progress = 0.;
@@ -53,24 +63,37 @@ struct gfx_view_node
     struct vec_visitor
     {
       const std::vector<ossia::value>& v;
-      void operator()(std::monostate) const noexcept { }
-      void operator()(float& val) const noexcept { if(!v.empty()) val = ossia::convert<float>(v[0]); }
-      void operator()(ossia::vec2f& val) const noexcept { val = ossia::convert<ossia::vec2f>(v); }
-      void operator()(ossia::vec3f& val) const noexcept { val = ossia::convert<ossia::vec3f>(v); }
-      void operator()(ossia::vec4f& val) const noexcept { val = ossia::convert<ossia::vec4f>(v); }
-      void operator()(image& val) const noexcept { }
+      void operator()(std::monostate) const noexcept {}
+      void operator()(float& val) const noexcept
+      {
+        if (!v.empty())
+          val = ossia::convert<float>(v[0]);
+      }
+      void operator()(ossia::vec2f& val) const noexcept
+      {
+        val = ossia::convert<ossia::vec2f>(v);
+      }
+      void operator()(ossia::vec3f& val) const noexcept
+      {
+        val = ossia::convert<ossia::vec3f>(v);
+      }
+      void operator()(ossia::vec4f& val) const noexcept
+      {
+        val = ossia::convert<ossia::vec4f>(v);
+      }
+      void operator()(image& val) const noexcept {}
     };
 
     struct value_visitor
     {
       ValueVariant& value;
-      void operator()() const noexcept { }
-      void operator()(ossia::impulse) const noexcept { }
+      void operator()() const noexcept {}
+      void operator()(ossia::impulse) const noexcept {}
       void operator()(int v) const noexcept { value = v; }
       void operator()(float v) const noexcept { value = v; }
       void operator()(bool v) const noexcept { value = v; }
       void operator()(char v) const noexcept { value = v; }
-      void operator()(const std::string& v) const noexcept { }
+      void operator()(const std::string& v) const noexcept {}
       void operator()(ossia::vec2f v) const noexcept { value = v; }
       void operator()(ossia::vec3f v) const noexcept { value = v; }
       void operator()(ossia::vec4f v) const noexcept { value = v; }
@@ -86,11 +109,8 @@ struct gfx_view_node
     v.apply(value_visitor{val});
   }
 
-  void process(int32_t port, const ossia::audio_vector& v)
-  {
-  }
+  void process(int32_t port, const ossia::audio_vector& v) {}
 };
-
 
 class gfx_window_context : public QObject
 {
@@ -99,25 +119,25 @@ class gfx_window_context : public QObject
 
   ossia::fast_hash_map<int32_t, gfx_view_node> nodes;
 
-
   Graph* m_graph{};
 
   QThread m_thread;
 
   bool must_recompute = false;
+
 public:
   moodycamel::ConcurrentQueue<gfx_message> tick_messages;
 
   gfx_window_context()
   {
-    #if defined(Q_OS_WIN)
-        m_api = D3D11;
+#if defined(Q_OS_WIN)
+    m_api = D3D11;
 #elif defined(Q_OS_DARWIN)
-        m_api = Metal;
+    m_api = Metal;
 #elif QT_CONFIG(vulkan)
-        m_api = Vulkan;
+    m_api = Vulkan;
 #else
-        m_api = OpenGL;
+    m_api = OpenGL;
 #endif
     m_api = Vulkan;
 
@@ -135,10 +155,11 @@ public:
     m_graph = new Graph;
 
     startTimer(16);
-    //moveToThread(&m_thread);
-    //m_thread.start();
+    // moveToThread(&m_thread);
+    // m_thread.start();
     //
-    //QMetaObject::invokeMethod(this, [this] { startTimer(16); }, Qt::QueuedConnection);
+    // QMetaObject::invokeMethod(this, [this] { startTimer(16); },
+    // Qt::QueuedConnection);
   }
 
   int32_t register_node(std::unique_ptr<Node> node)
@@ -156,7 +177,7 @@ public:
   void unregister_node(int32_t idx)
   {
     // Remove all edges involving that node
-    for(auto it = this->edges.begin(); it != this->edges.end(); )
+    for (auto it = this->edges.begin(); it != this->edges.end();)
     {
       if (it->first.node == idx || it->second.node == idx)
         it = this->edges.erase(it);
@@ -164,7 +185,7 @@ public:
         ++it;
     }
     auto it = nodes.find(idx);
-    if(it != nodes.end())
+    if (it != nodes.end())
     {
       m_graph->removeNode(it->second.impl.get());
       recompute_graph();
@@ -176,13 +197,13 @@ public:
 
   void recompute_edges()
   {
-    for(auto edge : m_graph->edges)
+    for (auto edge : m_graph->edges)
     {
       delete edge;
     }
 
     m_graph->edges.clear();
-    for(auto edge : edges)
+    for (auto edge : edges)
     {
       auto source_node_it = this->nodes.find(edge.first.node);
       assert(source_node_it != this->nodes.end());
@@ -209,7 +230,7 @@ public:
   void recompute_connections()
   {
     recompute_edges();
-    //m_graph->setupOutputs(m_api);
+    // m_graph->setupOutputs(m_api);
     m_graph->relinkGraph();
   }
 
@@ -233,19 +254,19 @@ public:
     };
 
     gfx_message msg;
-    while(tick_messages.try_dequeue(msg))
+    while (tick_messages.try_dequeue(msg))
     {
-      if(auto it = nodes.find(msg.node_id); it != nodes.end())
+      if (auto it = nodes.find(msg.node_id); it != nodes.end())
       {
         auto& node = it->second;
         node.process(msg.token);
 
         node_vis v{*this, node};
         int32_t p = 0;
-        for(std::vector<gfx_input>& dat : msg.inputs)
+        for (std::vector<gfx_input>& dat : msg.inputs)
         {
           v.sink = port_index{msg.node_id, p};
-          for(gfx_input& m : dat)
+          for (gfx_input& m : dat)
             std::visit(v, std::move(m));
 
           p++;
@@ -258,7 +279,7 @@ public:
   {
     update_inputs();
 
-    if(edges_changed)
+    if (edges_changed)
     {
       {
         std::lock_guard l{edges_lock};

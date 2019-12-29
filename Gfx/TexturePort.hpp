@@ -1,7 +1,6 @@
 #pragma once
-#include <Process/Dataflow/Port.hpp>
-
 #include <Dataflow/PortItem.hpp>
+#include <Process/Dataflow/Port.hpp>
 
 namespace Gfx
 {
@@ -21,7 +20,7 @@ UUID_METADATA(
 namespace Gfx
 {
 
-class  TextureInlet: public Process::Inlet
+class TextureInlet : public Process::Inlet
 {
   W_OBJECT(TextureInlet)
 
@@ -43,7 +42,7 @@ class TextureOutlet : public Process::Outlet
 {
   W_OBJECT(TextureOutlet)
 
-SCORE_SERIALIZE_FRIENDS
+  SCORE_SERIALIZE_FRIENDS
 public:
   MODEL_METADATA_IMPL_HPP(TextureOutlet)
   TextureOutlet() = delete;
@@ -56,7 +55,6 @@ public:
   TextureOutlet(DataStream::Deserializer&& vis, QObject* parent);
   TextureOutlet(JSONObject::Deserializer&& vis, QObject* parent);
 };
-
 
 struct TextureInletFactory final : public Dataflow::AutomatablePortFactory
 {
@@ -90,4 +88,3 @@ struct TextureOutletFactory final : public Dataflow::AutomatablePortFactory
   }
 };
 }
-

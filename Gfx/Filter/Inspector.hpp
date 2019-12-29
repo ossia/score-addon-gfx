@@ -13,10 +13,10 @@ class InspectorWidget final
 {
 public:
   explicit InspectorWidget(
-      const Gfx::Filter::Model& object, const score::DocumentContext& context,
+      const Gfx::Filter::Model& object,
+      const score::DocumentContext& context,
       QWidget* parent);
   ~InspectorWidget() override;
-
 };
 
 class InspectorFactory final

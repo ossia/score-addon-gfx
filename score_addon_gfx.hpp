@@ -9,14 +9,13 @@
 #include <score/plugins/qt_interfaces/GUIApplicationPlugin_QtInterface.hpp>
 #include <score/plugins/qt_interfaces/PluginRequirements_QtInterface.hpp>
 
-
 #include <utility>
 #include <vector>
 
 class score_addon_gfx final : public score::Plugin_QtInterface,
-                                   public score::FactoryInterface_QtInterface,
-                                   public score::CommandFactory_QtInterface,
-    public score::ApplicationPlugin_QtInterface
+                              public score::FactoryInterface_QtInterface,
+                              public score::CommandFactory_QtInterface,
+                              public score::ApplicationPlugin_QtInterface
 {
   SCORE_PLUGIN_METADATA(1, "11f76f02-11a4-4803-858d-a744ccdc0a7e")
 

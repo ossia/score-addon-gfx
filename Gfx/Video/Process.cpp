@@ -1,19 +1,22 @@
 #include "Process.hpp"
-#include <Gfx/TexturePort.hpp>
-#include <Process/Dataflow/Port.hpp>
 
-#include <wobjectimpl.h>
+#include <Process/Dataflow/Port.hpp>
+#include <Process/Dataflow/WidgetInlets.hpp>
+
+#include <QShaderBaker>
+
 #include <Gfx/Graph/node.hpp>
 #include <Gfx/Graph/nodes.hpp>
-#include <QShaderBaker>
-#include <Process/Dataflow/WidgetInlets.hpp>
+#include <Gfx/TexturePort.hpp>
+#include <wobjectimpl.h>
 
 W_OBJECT_IMPL(Gfx::Video::Model)
 namespace Gfx::Video
 {
 
 Model::Model(
-    const TimeVal& duration, const Id<Process::ProcessModel>& id,
+    const TimeVal& duration,
+    const Id<Process::ProcessModel>& id,
     QObject* parent)
     : Process::ProcessModel{duration, id, "gfxProcess", parent}
 {
@@ -21,16 +24,14 @@ Model::Model(
   m_outlets.push_back(new TextureOutlet{Id<Process::Port>(0), this});
 
   // decoder.load("/home/kdab/test.h264", 60.);
-  //setPath("/home/jcelerier/VDMX_Halloween_Hap_4K/inlight_rotate_full_hap.mov");
+  // setPath("/home/jcelerier/VDMX_Halloween_Hap_4K/inlight_rotate_full_hap.mov");
 }
 
-Model::~Model()
-{
-}
+Model::~Model() {}
 
 void Model::setPath(const QString& f)
 {
-  if(f == m_path)
+  if (f == m_path)
     return;
 
   m_path = f;
@@ -44,29 +45,17 @@ QString Model::prettyName() const noexcept
   return tr("Video");
 }
 
-void Model::startExecution()
-{
-}
+void Model::startExecution() {}
 
-void Model::stopExecution()
-{
-}
+void Model::stopExecution() {}
 
-void Model::reset()
-{
-}
+void Model::reset() {}
 
-void Model::setDurationAndScale(const TimeVal& newDuration) noexcept
-{
-}
+void Model::setDurationAndScale(const TimeVal& newDuration) noexcept {}
 
-void Model::setDurationAndGrow(const TimeVal& newDuration) noexcept
-{
-}
+void Model::setDurationAndGrow(const TimeVal& newDuration) noexcept {}
 
-void Model::setDurationAndShrink(const TimeVal& newDuration) noexcept
-{
-}
+void Model::setDurationAndShrink(const TimeVal& newDuration) noexcept {}
 
 QSet<QString> DropHandler::mimeTypes() const noexcept
 {
@@ -89,14 +78,15 @@ std::vector<Process::ProcessDropHandler::ProcessDrop> DropHandler::dropData(
 {
   std::vector<Process::ProcessDropHandler::ProcessDrop> vec;
   {
-    for (const auto& [filename, file]: data)
+    for (const auto& [filename, file] : data)
     {
       Process::ProcessDropHandler::ProcessDrop p;
       p.creation.key = Metadata<ConcreteKey_k, Gfx::Video::Model>::get();
-      p.setup = [str=filename] (Process::ProcessModel& m, score::Dispatcher& disp) {
-        auto& midi = static_cast<Gfx::Video::Model&>(m);
-        disp.submit(new ChangeVideo{midi, str});
-      };
+      p.setup =
+          [str = filename](Process::ProcessModel& m, score::Dispatcher& disp) {
+            auto& midi = static_cast<Gfx::Video::Model&>(m);
+            disp.submit(new ChangeVideo{midi, str});
+          };
       vec.push_back(std::move(p));
     }
   }

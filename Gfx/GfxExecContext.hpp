@@ -1,22 +1,18 @@
 #pragma once
-#include <Gfx/GfxContext.hpp>
 #include <Process/ExecutionContext.hpp>
 
+#include <Gfx/GfxContext.hpp>
 
 namespace Gfx
 {
 
-
 class gfx_exec_context final : public Execution::ExecutionAction
 {
 public:
-  gfx_exec_context(gfx_window_context& w): ui{&w} { }
+  gfx_exec_context(gfx_window_context& w) : ui{&w} {}
   gfx_window_context* ui{};
 
-  void startTick() override
-  {
-    edges.clear();
-  }
+  void startTick() override { edges.clear(); }
 
   void setEdge(port_index source, port_index sink)
   {
@@ -25,7 +21,7 @@ public:
 
   void endTick() override
   {
-    if(edges != prev_edges)
+    if (edges != prev_edges)
     {
       {
         std::lock_guard l{ui->edges_lock};
@@ -40,6 +36,5 @@ public:
   ossia::flat_set<std::pair<port_index, port_index>> prev_edges;
   ossia::flat_set<std::pair<port_index, port_index>> edges;
 };
-
 
 }

@@ -3,6 +3,7 @@
 #include "nodes.hpp"
 #include "renderer.hpp"
 #include "window.hpp"
+
 #include <score/tools/Debug.hpp>
 
 static void graphwalk(Node* node, std::vector<Node*>& list)
@@ -51,9 +52,9 @@ void Graph::setupOutputs(GraphicsApi graphicsApi)
 
   for (auto output : outputs)
   {
-    if(output->window)
+    if (output->window)
     {
-      output->window->onRender = [] { };
+      output->window->onRender = [] {};
       ////output->window->state.hasSwapChain = false;
     }
   }
@@ -63,11 +64,11 @@ void Graph::setupOutputs(GraphicsApi graphicsApi)
     node->renderedNodes.clear();
   }
 
-  for(auto& renderer : renderers)
+  for (auto& renderer : renderers)
   {
     renderer.release();
 
-    for(auto rn : renderer.renderedNodes)
+    for (auto rn : renderer.renderedNodes)
       delete rn;
   }
 
@@ -82,7 +83,7 @@ void Graph::setupOutputs(GraphicsApi graphicsApi)
   int i = 0;
   for (auto output : outputs)
   {
-    if(!output->window)
+    if (!output->window)
     {
       output->window = std::make_shared<Window>(graphicsApi);
 
@@ -91,7 +92,8 @@ void Graph::setupOutputs(GraphicsApi graphicsApi)
         output->window->setVulkanInstance(&vulkanInstance);
 #endif
       output->window->onWindowReady = [=] {
-        output->window->state = RenderState::create(*output->window, graphicsApi);
+        output->window->state
+            = RenderState::create(*output->window, graphicsApi);
 
         createRenderer(output, output->window->state);
       };
@@ -101,7 +103,7 @@ void Graph::setupOutputs(GraphicsApi graphicsApi)
     else
     {
       createRenderer(output, output->window->state);
-      //output->window->state.hasSwapChain = true;
+      // output->window->state.hasSwapChain = true;
     }
 
     output->window->onRender = [=] {
@@ -115,7 +117,7 @@ void Graph::setupOutputs(GraphicsApi graphicsApi)
 
 void Graph::relinkGraph()
 {
-  for(auto& r : renderers)
+  for (auto& r : renderers)
   {
     for (auto& node : nodes)
       node->addedToGraph = false;
@@ -139,15 +141,15 @@ void Graph::relinkGraph()
       }
       std::reverse(model_nodes.begin(), model_nodes.end());
 
-      if(model_nodes.size() > 1)
+      if (model_nodes.size() > 1)
       {
-        for(auto node : model_nodes)
+        for (auto node : model_nodes)
         {
           auto rn = node->renderedNodes[&r];
-          if(!rn)
+          if (!rn)
           {
             rn = node->createRenderer();
-            if(node != model_nodes.back())
+            if (node != model_nodes.back())
             {
               rn->createRenderTarget(r.state);
             }
@@ -163,7 +165,7 @@ void Graph::relinkGraph()
           r.renderedNodes.push_back(rn);
         }
       }
-      else if(model_nodes.size() == 1)
+      else if (model_nodes.size() == 1)
       {
         auto rn = model_nodes[0]->renderedNodes[&r];
         assert(rn);
@@ -197,7 +199,7 @@ void Graph::createRenderer(OutputNode* output, RenderState state)
     // be processed
 
     // We create renderers for each of them
-    for(auto node : model_nodes)
+    for (auto node : model_nodes)
     {
       r.renderedNodes.push_back(node->createRenderer());
     }
@@ -218,16 +220,16 @@ void Graph::createRenderer(OutputNode* output, RenderState state)
   {
     auto& r = renderers.back();
     // Register the rendered nodes with their parents
-    for(auto rn : r.renderedNodes)
+    for (auto rn : r.renderedNodes)
     {
       const_cast<Node&>(rn->node).renderedNodes[&r] = rn;
     }
 
     r.init(*r.state.rhi);
 
-    if(model_nodes.size() > 1)
+    if (model_nodes.size() > 1)
     {
-      for(auto rn : r.renderedNodes)
+      for (auto rn : r.renderedNodes)
         rn->init(r);
     }
   }

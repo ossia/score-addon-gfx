@@ -1,20 +1,23 @@
 #include "Process.hpp"
-#include <Gfx/TexturePort.hpp>
-#include <Process/Dataflow/Port.hpp>
 
-#include <wobjectimpl.h>
-#include <Gfx/Graph/node.hpp>
-#include <Gfx/Graph/nodes.hpp>
+#include <Process/Dataflow/Port.hpp>
+#include <Process/Dataflow/WidgetInlets.hpp>
+
 #include <QFileInfo>
 #include <QShaderBaker>
-#include <Process/Dataflow/WidgetInlets.hpp>
+
+#include <Gfx/Graph/node.hpp>
+#include <Gfx/Graph/nodes.hpp>
+#include <Gfx/TexturePort.hpp>
+#include <wobjectimpl.h>
 
 W_OBJECT_IMPL(Gfx::Filter::Model)
 namespace Gfx::Filter
 {
 
 Model::Model(
-    const TimeVal& duration, const Id<Process::ProcessModel>& id,
+    const TimeVal& duration,
+    const Id<Process::ProcessModel>& id,
     QObject* parent)
     : Process::ProcessModel{duration, id, "gfxProcess", parent}
 {
@@ -59,17 +62,15 @@ Model::Model(
   )_");
 }
 
-Model::~Model()
-{
-}
+Model::~Model() {}
 
 void Model::setFragment(const QString& f)
 {
-  if(f == m_fragment)
+  if (f == m_fragment)
     return;
   m_fragment = f;
 
-  for(auto inlet : m_inlets)
+  for (auto inlet : m_inlets)
     delete inlet;
   m_inlets.clear();
 
@@ -89,34 +90,37 @@ void Model::setFragment(const QString& f)
 
   const auto& d = s.description();
 
-  for(auto& ub : d.combinedImageSamplers())
+  for (auto& ub : d.combinedImageSamplers())
   {
     m_inlets.push_back(new TextureInlet{Id<Process::Port>(i++), this});
   }
 
-  for(auto& ub : d.uniformBlocks())
+  for (auto& ub : d.uniformBlocks())
   {
-    if(ub.blockName != "material_t")
+    if (ub.blockName != "material_t")
       continue;
 
-    for(auto& u : ub.members)
+    for (auto& u : ub.members)
     {
-      switch(u.type)
+      switch (u.type)
       {
         case QShaderDescription::Float:
-          m_inlets.push_back(new Process::FloatSlider{Id<Process::Port>(i++), this});
+          m_inlets.push_back(
+              new Process::FloatSlider{Id<Process::Port>(i++), this});
           m_inlets.back()->hidden = true;
           m_inlets.back()->setCustomData(u.name);
           controlAdded(m_inlets.back()->id());
           break;
         case QShaderDescription::Vec4:
-          m_inlets.push_back(new Process::HSVSlider{Id<Process::Port>(i++), this});
+          m_inlets.push_back(
+              new Process::HSVSlider{Id<Process::Port>(i++), this});
           m_inlets.back()->hidden = true;
           m_inlets.back()->setCustomData(u.name);
           controlAdded(m_inlets.back()->id());
           break;
         default:
-          m_inlets.push_back(new Process::ControlInlet{Id<Process::Port>(i++), this});
+          m_inlets.push_back(
+              new Process::ControlInlet{Id<Process::Port>(i++), this});
           m_inlets.back()->hidden = true;
           m_inlets.back()->setCustomData(u.name);
           controlAdded(m_inlets.back()->id());
@@ -134,29 +138,17 @@ QString Model::prettyName() const noexcept
   return tr("GFX Filter");
 }
 
-void Model::startExecution()
-{
-}
+void Model::startExecution() {}
 
-void Model::stopExecution()
-{
-}
+void Model::stopExecution() {}
 
-void Model::reset()
-{
-}
+void Model::reset() {}
 
-void Model::setDurationAndScale(const TimeVal& newDuration) noexcept
-{
-}
+void Model::setDurationAndScale(const TimeVal& newDuration) noexcept {}
 
-void Model::setDurationAndGrow(const TimeVal& newDuration) noexcept
-{
-}
+void Model::setDurationAndGrow(const TimeVal& newDuration) noexcept {}
 
-void Model::setDurationAndShrink(const TimeVal& newDuration) noexcept
-{
-}
+void Model::setDurationAndShrink(const TimeVal& newDuration) noexcept {}
 
 QSet<QString> DropHandler::mimeTypes() const noexcept
 {
@@ -179,15 +171,16 @@ std::vector<Process::ProcessDropHandler::ProcessDrop> DropHandler::dropData(
 {
   std::vector<Process::ProcessDropHandler::ProcessDrop> vec;
   {
-    for (const auto& [filename, file]: data)
+    for (const auto& [filename, file] : data)
     {
       Process::ProcessDropHandler::ProcessDrop p;
       p.creation.key = Metadata<ConcreteKey_k, Gfx::Filter::Model>::get();
       p.creation.prettyName = QFileInfo{filename}.baseName();
-      p.setup = [str=file] (Process::ProcessModel& m, score::Dispatcher& disp) {
-        auto& midi = static_cast<Gfx::Filter::Model&>(m);
-        disp.submit(new ChangeFragmentShader{midi, QString{str}});
-      };
+      p.setup
+          = [str = file](Process::ProcessModel& m, score::Dispatcher& disp) {
+              auto& midi = static_cast<Gfx::Filter::Model&>(m);
+              disp.submit(new ChangeFragmentShader{midi, QString{str}});
+            };
       vec.push_back(std::move(p));
     }
   }

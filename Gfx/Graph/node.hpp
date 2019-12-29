@@ -2,12 +2,12 @@
 #include "renderstate.hpp"
 #include "uniforms.hpp"
 
+#include <ossia/detail/flat_map.hpp>
+
 #include <QShaderBaker>
 
 #include <algorithm>
 #include <vector>
-
-#include <ossia/detail/flat_map.hpp>
 
 class Node;
 struct Port;
@@ -53,10 +53,10 @@ struct Sampler
 #pragma pack(push, 1)
 #endif
 struct
-    #if defined(__GNUC__) || defined(__clang__)
+#if defined(__GNUC__) || defined(__clang__)
     __attribute__((packed))
-    #endif
-ProcessUBO
+#endif
+    ProcessUBO
 {
   float time{};
   float timeDelta{};
@@ -74,6 +74,7 @@ class RenderedNode;
 class Node
 {
   friend class RenderedNode;
+
 public:
   explicit Node();
   explicit Node(QString frag);
@@ -88,6 +89,7 @@ public:
   ossia::flat_map<Renderer*, RenderedNode*> renderedNodes;
 
   ProcessUBO standardUBO{};
+
 protected:
   void setShaders(QString vert, QString frag);
 
@@ -98,20 +100,12 @@ public:
   bool addedToGraph{};
 };
 
-
 class RenderedNode
 {
 public:
-  RenderedNode(const Node& node) noexcept
-    : node{node}
-  {
+  RenderedNode(const Node& node) noexcept : node{node} {}
 
-  }
-
-  virtual ~RenderedNode()
-  {
-
-  }
+  virtual ~RenderedNode() {}
   const Node& node;
 
   QRhiTexture* m_texture{};

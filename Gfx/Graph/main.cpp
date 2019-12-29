@@ -1,5 +1,5 @@
-#include "window.hpp"
 #include "filternode.hpp"
+#include "window.hpp"
 
 Node::~Node() {}
 
@@ -16,4 +16,4 @@ ProductNode::~ProductNode() {}
 
 NoiseNode::~NoiseNode() {}
 
-FilterNode::~FilterNode() { }
+FilterNode::~FilterNode() {}

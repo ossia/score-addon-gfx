@@ -42,7 +42,6 @@ struct RenderState
   QOffscreenSurface* surface{};
   bool hasSwapChain = false;
 
-
   static RenderState create(QWindow& window, GraphicsApi graphicsApi)
   {
     RenderState state;

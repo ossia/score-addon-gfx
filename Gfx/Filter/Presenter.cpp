@@ -1,21 +1,20 @@
-#include <score/command/Dispatchers/CommandDispatcher.hpp>
+#include <Process/Dataflow/Port.hpp>
+#include <Process/Dataflow/PortItem.hpp>
+#include <Process/Style/Pixmaps.hpp>
 
+#include <score/command/Dispatchers/CommandDispatcher.hpp>
+#include <score/command/Dispatchers/MacroCommandDispatcher.hpp>
+#include <score/graphics/GraphicWidgets.hpp>
+#include <score/model/path/PathSerialization.hpp>
+#include <score/tools/IdentifierGeneration.hpp>
+
+#include <QTimer>
+
+#include <Control/DefaultEffectItem.hpp>
+#include <Effect/EffectLayout.hpp>
 #include <Gfx/Filter/Presenter.hpp>
 #include <Gfx/Filter/Process.hpp>
 #include <Gfx/Filter/View.hpp>
-
-
-#include <Process/Dataflow/Port.hpp>
-#include <score/tools/IdentifierGeneration.hpp>
-#include <score/model/path/PathSerialization.hpp>
-#include <score/command/Dispatchers/MacroCommandDispatcher.hpp>
-#include <Control/DefaultEffectItem.hpp>
-#include <Effect/EffectLayout.hpp>
-#include <Process/Dataflow/PortItem.hpp>
-#include <Process/Style/Pixmaps.hpp>
-#include <score/graphics/GraphicWidgets.hpp>
-#include <QTimer>
-
 
 namespace Gfx::Filter
 {
@@ -26,8 +25,10 @@ struct Presenter::Port
   QRectF rect;
 };
 Presenter::Presenter(
-    const Model& layer, View* view,
-    const Process::Context& ctx, QObject* parent)
+    const Model& layer,
+    View* view,
+    const Process::Context& ctx,
+    QObject* parent)
     : Process::LayerPresenter{ctx, parent}, m_model{layer}, m_view{view}
 {
   auto& portFactory = ctx.app.interfaces<Process::PortFactoryList>();
@@ -37,19 +38,18 @@ Presenter::Presenter(
       setupInlet(*inlet, portFactory, ctx);
   }
 
-  connect(&layer, &Model::inletsChanged,
-          this, [this] {
-    for(auto& port : m_ports)
+  connect(&layer, &Model::inletsChanged, this, [this] {
+    for (auto& port : m_ports)
       delete port.root;
     m_ports.clear();
 
-    auto& portFactory = context().context.app.interfaces<Process::PortFactoryList>();
+    auto& portFactory
+        = context().context.app.interfaces<Process::PortFactoryList>();
     for (auto& e : this->m_model.inlets())
     {
       if (auto inlet = qobject_cast<Process::ControlInlet*>(e))
         setupInlet(*inlet, portFactory, context().context);
     }
-
   });
 }
 
@@ -73,13 +73,9 @@ void Presenter::putBehind()
   m_view->setOpacity(0.2);
 }
 
-void Presenter::on_zoomRatioChanged(ZoomRatio)
-{
-}
+void Presenter::on_zoomRatioChanged(ZoomRatio) {}
 
-void Presenter::parentGeometryChanged()
-{
-}
+void Presenter::parentGeometryChanged() {}
 
 const Process::ProcessModel& Presenter::model() const
 {
@@ -99,24 +95,24 @@ void Presenter::setupInlet(
   int i = m_ports.size();
 
   auto csetup = Process::controlSetup(
-   [ ] (auto& factory, auto& inlet, const auto& doc, auto item, auto parent)
-   { return factory.makeItem(inlet, doc, item, parent); },
-   [ ] (auto& factory, auto& inlet, const auto& doc, auto item, auto parent)
-   { return factory.makeControlItem(inlet, doc, item, parent); },
-   [&] (int j) { return m_ports[j].rect.size(); },
-   [&] { return port.customData(); }
-  );
-  auto [item, portItem, widg, lab, itemRect]
-      = Process::createControl(i, csetup, port, portFactory, doc, m_view, this);
-
+      [](auto& factory, auto& inlet, const auto& doc, auto item, auto parent) {
+        return factory.makeItem(inlet, doc, item, parent);
+      },
+      [](auto& factory, auto& inlet, const auto& doc, auto item, auto parent) {
+        return factory.makeControlItem(inlet, doc, item, parent);
+      },
+      [&](int j) { return m_ports[j].rect.size(); },
+      [&] { return port.customData(); });
+  auto [item, portItem, widg, lab, itemRect] = Process::createControl(
+      i, csetup, port, portFactory, doc, m_view, this);
 
   m_ports.push_back(Port{item, portItem, itemRect});
   // TODO updateRect();
 
-  // TODO con(inlet, &Process::ControlInlet::domainChanged, this, [this, &inlet] {
+  // TODO con(inlet, &Process::ControlInlet::domainChanged, this, [this,
+  // &inlet] {
   // TODO   on_controlRemoved(inlet);
   // TODO   on_controlAdded(inlet.id());
   // TODO });
-
 }
 }

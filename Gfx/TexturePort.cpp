@@ -1,5 +1,7 @@
 #include "TexturePort.hpp"
+
 #include <score/plugins/SerializableHelpers.hpp>
+
 #include <wobjectimpl.h>
 W_OBJECT_IMPL(Gfx::TextureInlet)
 W_OBJECT_IMPL(Gfx::TextureOutlet)
@@ -13,64 +15,61 @@ MODEL_METADATA_IMPL_CPP(TextureOutlet)
 TextureInlet::~TextureInlet() {}
 
 TextureInlet::TextureInlet(Id<Process::Port> c, QObject* parent)
-  : Process::Inlet{std::move(c), parent}
+    : Process::Inlet{std::move(c), parent}
 {
   type = Process::PortType::Texture;
 }
 
 TextureInlet::TextureInlet(DataStream::Deserializer& vis, QObject* parent)
-  : Inlet{vis, parent}
+    : Inlet{vis, parent}
 {
   vis.writeTo(*this);
 }
 TextureInlet::TextureInlet(JSONObject::Deserializer& vis, QObject* parent)
-  : Inlet{vis, parent}
+    : Inlet{vis, parent}
 {
   vis.writeTo(*this);
 }
 TextureInlet::TextureInlet(DataStream::Deserializer&& vis, QObject* parent)
-  : Inlet{vis, parent}
+    : Inlet{vis, parent}
 {
   vis.writeTo(*this);
 }
 TextureInlet::TextureInlet(JSONObject::Deserializer&& vis, QObject* parent)
-  : Inlet{vis, parent}
+    : Inlet{vis, parent}
 {
   vis.writeTo(*this);
 }
 
-
 TextureOutlet::~TextureOutlet() {}
 
 TextureOutlet::TextureOutlet(Id<Process::Port> c, QObject* parent)
-  : Process::Outlet{std::move(c), parent}
+    : Process::Outlet{std::move(c), parent}
 {
   type = Process::PortType::Texture;
 }
 
 TextureOutlet::TextureOutlet(DataStream::Deserializer& vis, QObject* parent)
-  : Outlet{vis, parent}
+    : Outlet{vis, parent}
 {
   vis.writeTo(*this);
 }
 TextureOutlet::TextureOutlet(JSONObject::Deserializer& vis, QObject* parent)
-  : Outlet{vis, parent}
+    : Outlet{vis, parent}
 {
   vis.writeTo(*this);
 }
 TextureOutlet::TextureOutlet(DataStream::Deserializer&& vis, QObject* parent)
-  : Outlet{vis, parent}
+    : Outlet{vis, parent}
 {
   vis.writeTo(*this);
 }
 TextureOutlet::TextureOutlet(JSONObject::Deserializer&& vis, QObject* parent)
-  : Outlet{vis, parent}
+    : Outlet{vis, parent}
 {
   vis.writeTo(*this);
 }
 }
-
-
 
 template <>
 SCORE_LIB_PROCESS_EXPORT void
@@ -95,7 +94,6 @@ SCORE_LIB_PROCESS_EXPORT void
 JSONObjectWriter::write<Gfx::TextureInlet>(Gfx::TextureInlet& p)
 {
 }
-
 
 template <>
 SCORE_LIB_PROCESS_EXPORT void

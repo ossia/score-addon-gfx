@@ -39,12 +39,11 @@ public:
 
   ~Window()
   {
-    if(handle())
+    if (handle())
       releaseSwapChain();
 
     state.release();
   }
-
 
   std::function<void()> onWindowReady;
   std::function<void()> onRender;

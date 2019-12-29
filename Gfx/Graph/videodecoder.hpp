@@ -21,16 +21,15 @@ class video_decoder
 public:
   video_decoder() noexcept = default;
 
-  ~video_decoder() noexcept
-  {
-    close_file();
-  }
+  ~video_decoder() noexcept { close_file(); }
 
   bool load(const std::string& inputFile, double fps_unused) noexcept
   {
     close_file();
 
-    if (avformat_open_input(&m_formatContext, inputFile.c_str(), nullptr, nullptr) != 0)
+    if (avformat_open_input(
+            &m_formatContext, inputFile.c_str(), nullptr, nullptr)
+        != 0)
     {
       close_file();
       return false;
@@ -59,16 +58,13 @@ public:
 
   auto pixel_format() const noexcept { return m_pixel_format; }
 
-  void seek(int64_t dts)
-  {
-    m_seekTo = dts;
-  }
+  void seek(int64_t dts) { m_seekTo = dts; }
 
   AVFrame* dequeue_frame() noexcept
   {
     AVFrame* f{};
     m_framesMutex.lock();
-    if(auto to_discard = m_discardUntil)
+    if (auto to_discard = m_discardUntil)
     {
       while (!m_frames.empty() && m_frames.front() != to_discard)
       {
@@ -77,7 +73,7 @@ public:
         m_frames.pop_front();
       }
 
-      if(!m_frames.empty())
+      if (!m_frames.empty())
         m_frames.pop_front();
 
       m_discardUntil = nullptr;
@@ -99,7 +95,7 @@ private:
   {
     while (m_running.load(std::memory_order_acquire))
     {
-      if(int64_t seek = m_seekTo.exchange(-1); seek >= 0)
+      if (int64_t seek = m_seekTo.exchange(-1); seek >= 0)
       {
         seek_impl(seek);
       }
@@ -113,7 +109,7 @@ private:
 
         if (mustRead)
         {
-          if(auto f = read_frame_impl())
+          if (auto f = read_frame_impl())
           {
             m_last_dts = f->pkt_dts;
             std::lock_guard _{m_framesMutex};
@@ -128,7 +124,7 @@ private:
   {
     m_running.store(false, std::memory_order::release);
 
-    if(m_thread.joinable())
+    if (m_thread.joinable())
       m_thread.join();
 
     close_video();
@@ -144,48 +140,49 @@ private:
   {
     {
       std::lock_guard _{m_framesMutex};
-      if(m_frames.empty() || m_frames.front()->pkt_dts == dts)
+      if (m_frames.empty() || m_frames.front()->pkt_dts == dts)
       {
         return false;
       }
     }
 
-     int flags = AVSEEK_FLAG_FRAME;
-     if (dts < this->m_last_dts)
-     {
-         flags |= AVSEEK_FLAG_BACKWARD;
-     }
+    int flags = AVSEEK_FLAG_FRAME;
+    if (dts < this->m_last_dts)
+    {
+      flags |= AVSEEK_FLAG_BACKWARD;
+    }
 
-     if(av_seek_frame(m_formatContext, m_stream, dts, flags))
-     {
-         printf("\nFailed to seek for time %d", dts);
-        return false;
-     }
+    if (av_seek_frame(m_formatContext, m_stream, dts, flags))
+    {
+      printf("\nFailed to seek for time %d", dts);
+      return false;
+    }
 
-     avcodec_flush_buffers(m_codecContext);
+    avcodec_flush_buffers(m_codecContext);
 
-     int got_frame = 0;
-     AVPacket pkt{};
-     AVFrame* f = av_frame_alloc();
-     do
-     {
-       if (av_read_frame(m_formatContext, &pkt) == 0) {
-         got_frame = enqueue_frame(&pkt, f);
-         av_packet_unref(&pkt);
-       }
-       else
-       {
-         break;
-       }
-     } while(!(got_frame && f->pkt_dts >= dts));
+    int got_frame = 0;
+    AVPacket pkt{};
+    AVFrame* f = av_frame_alloc();
+    do
+    {
+      if (av_read_frame(m_formatContext, &pkt) == 0)
+      {
+        got_frame = enqueue_frame(&pkt, f);
+        av_packet_unref(&pkt);
+      }
+      else
+      {
+        break;
+      }
+    } while (!(got_frame && f->pkt_dts >= dts));
 
-     m_last_dts = f->pkt_dts;
-     {
-       std::lock_guard _{m_framesMutex};
-       m_discardUntil = f;
-       m_frames.push_back(f);
-     }
-     return true;
+    m_last_dts = f->pkt_dts;
+    {
+      std::lock_guard _{m_framesMutex};
+      m_discardUntil = f;
+      m_frames.push_back(f);
+    }
+    return true;
   }
 
   AVFrame* read_frame_impl() noexcept

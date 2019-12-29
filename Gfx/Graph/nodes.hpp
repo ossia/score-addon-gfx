@@ -23,9 +23,7 @@ struct OutputNode : Node
   std::shared_ptr<Window> window{};
 
 protected:
-  OutputNode() : Node{filter}
-  {
-  }
+  OutputNode() : Node{filter} {}
 };
 
 struct ColorNode : Node

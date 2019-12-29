@@ -1,6 +1,7 @@
 #pragma once
 #include "node.hpp"
 #include "renderer.hpp"
+
 #include <ossia/detail/algorithms.hpp>
 struct OutputNode;
 class Window;
@@ -9,15 +10,11 @@ struct Graph
   std::vector<Node*> nodes;
   std::vector<Edge*> edges;
 
-  void addNode(Node* n)
-  {
-    nodes.push_back(n);
-  }
+  void addNode(Node* n) { nodes.push_back(n); }
 
   void removeNode(Node* n)
   {
-    if(auto it = ossia::find(nodes, n);
-       it != nodes.end())
+    if (auto it = ossia::find(nodes, n); it != nodes.end())
     {
       nodes.erase(it);
     }
@@ -32,6 +29,7 @@ struct Graph
   void relinkGraph();
 
   ~Graph();
+
 private:
   std::vector<OutputNode*> outputs;
   std::vector<Renderer> renderers;

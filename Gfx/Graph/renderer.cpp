@@ -12,13 +12,11 @@ void Renderer::init(QRhi& rhi)
   m_vertexBuffer->build();
 
   m_rendererUBO = rhi.newBuffer(
-      QRhiBuffer::Immutable,
-      QRhiBuffer::UniformBuffer,
-      sizeof(ScreenUBO));
+      QRhiBuffer::Immutable, QRhiBuffer::UniformBuffer, sizeof(ScreenUBO));
   m_rendererUBO->build();
 
   m_emptyTexture = rhi.newTexture(
-               QRhiTexture::RGBA8, QSize{1, 1}, 1, QRhiTexture::Flag{});
+      QRhiTexture::RGBA8, QSize{1, 1}, 1, QRhiTexture::Flag{});
   m_emptyTexture->build();
 }
 
@@ -69,7 +67,7 @@ void Renderer::maybeRebuild()
 
 void Renderer::render()
 {
-  if(renderedNodes.size() <= 1)
+  if (renderedNodes.size() <= 1)
     return;
   const auto commands = state.swapChain->currentFrameCommandBuffer();
 

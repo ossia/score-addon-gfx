@@ -1,14 +1,14 @@
 #pragma once
+#include <Library/LibraryInterface.hpp>
+#include <Process/Drop/ProcessDropHandler.hpp>
 #include <Process/GenericProcessFactory.hpp>
 #include <Process/Process.hpp>
 
-#include <Gfx/Video/Metadata.hpp>
-#include <Gfx/Graph/videodecoder.hpp>
+#include <score/command/PropertyCommand.hpp>
 
 #include <Gfx/CommandFactory.hpp>
-#include <score/command/PropertyCommand.hpp>
-#include <Process/Drop/ProcessDropHandler.hpp>
-#include <Library/LibraryInterface.hpp>
+#include <Gfx/Graph/videodecoder.hpp>
+#include <Gfx/Video/Metadata.hpp>
 namespace Gfx::Video
 {
 class Model final : public Process::ProcessModel
@@ -19,7 +19,8 @@ class Model final : public Process::ProcessModel
 
 public:
   Model(
-      const TimeVal& duration, const Id<Process::ProcessModel>& id,
+      const TimeVal& duration,
+      const Id<Process::ProcessModel>& id,
       QObject* parent);
 
   template <typename Impl>
@@ -35,7 +36,11 @@ public:
   void pathChanged(const QString& f) W_SIGNAL(pathChanged, f);
   PROPERTY(QString, path READ path WRITE setPath NOTIFY pathChanged)
 
-  const std::shared_ptr<video_decoder>& decoder() const noexcept { return m_decoder; }
+  const std::shared_ptr<video_decoder>& decoder() const noexcept
+  {
+    return m_decoder;
+  }
+
 private:
   QString prettyName() const noexcept override;
   void startExecution() override;
@@ -72,10 +77,5 @@ class DropHandler final : public Process::ProcessDropHandler
 
 }
 
-
-PROPERTY_COMMAND_T(
-    Gfx,
-    ChangeVideo,
-    Video::Model::p_path,
-    "Change video")
+PROPERTY_COMMAND_T(Gfx, ChangeVideo, Video::Model::p_path, "Change video")
 SCORE_COMMAND_DECL_T(Gfx::ChangeVideo)

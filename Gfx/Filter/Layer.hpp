@@ -8,5 +8,7 @@
 namespace Gfx::Filter
 {
 using LayerFactory = Process::LayerFactory_T<
-    Gfx::Filter::Model, Gfx::Filter::Presenter, Gfx::Filter::View>;
+    Gfx::Filter::Model,
+    Gfx::Filter::Presenter,
+    Gfx::Filter::View>;
 }

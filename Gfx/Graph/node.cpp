@@ -82,7 +82,7 @@ void RenderedNode::init(Renderer& renderer)
 
   auto& input = node.input;
   m_processUBO = rhi.newBuffer(
-                    QRhiBuffer::Dynamic, QRhiBuffer::UniformBuffer, sizeof(ProcessUBO));
+      QRhiBuffer::Dynamic, QRhiBuffer::UniformBuffer, sizeof(ProcessUBO));
   m_processUBO->build();
 
   // Set up shader inputs
@@ -118,9 +118,9 @@ void RenderedNode::init(Renderer& renderer)
 
           QRhiTexture* texture = renderer.m_emptyTexture;
           if (!in->edges.empty())
-            if(auto source_node = in->edges[0]->source->node)
-              if(auto source_rd = source_node->renderedNodes[&renderer])
-                if(auto tex = source_rd->m_texture)
+            if (auto source_node = in->edges[0]->source->node)
+              if (auto source_rd = source_node->renderedNodes[&renderer])
+                if (auto tex = source_rd->m_texture)
                   texture = tex;
 
           m_samplers.push_back({sampler, texture});
@@ -153,9 +153,9 @@ void RenderedNode::init(Renderer& renderer)
     m_ps->setSampleCount(1);
 
     m_ps->setDepthTest(false);
-    //m_ps->setDepthOp(QRhiGraphicsPipeline::Always);
+    // m_ps->setDepthOp(QRhiGraphicsPipeline::Always);
     m_ps->setDepthWrite(false);
-    //m_ps->setCullMode(QRhiGraphicsPipeline::Back);
+    // m_ps->setCullMode(QRhiGraphicsPipeline::Back);
 
     // Shader setup
 
@@ -182,14 +182,15 @@ void RenderedNode::init(Renderer& renderer)
     // We always have a default binding at location 0 for the MVP matrix.
     {
       const auto rendererBinding = QRhiShaderResourceBinding::uniformBuffer(
-                                     0, bindingStages, renderer.m_rendererUBO);
+          0, bindingStages, renderer.m_rendererUBO);
       bindings.push_back(rendererBinding);
     }
 
     // And another one at location 1 for time, etc
     {
-      const auto standardUniformBinding = QRhiShaderResourceBinding::uniformBuffer(
-                                            1, bindingStages, m_processUBO);
+      const auto standardUniformBinding
+          = QRhiShaderResourceBinding::uniformBuffer(
+              1, bindingStages, m_processUBO);
       bindings.push_back(standardUniformBinding);
     }
 
@@ -226,11 +227,16 @@ void RenderedNode::init(Renderer& renderer)
   }
 }
 
-void RenderedNode::customUpdate(Renderer& renderer, QRhiResourceUpdateBatch& res) {}
+void RenderedNode::customUpdate(
+    Renderer& renderer,
+    QRhiResourceUpdateBatch& res)
+{
+}
 
 void RenderedNode::update(Renderer& renderer, QRhiResourceUpdateBatch& res)
 {
-  res.updateDynamicBuffer(m_processUBO, 0, sizeof(ProcessUBO), &this->node.standardUBO);
+  res.updateDynamicBuffer(
+      m_processUBO, 0, sizeof(ProcessUBO), &this->node.standardUBO);
 
   if (m_materialSize > 0)
   {
@@ -276,10 +282,7 @@ void RenderedNode::update(Renderer& renderer, QRhiResourceUpdateBatch& res)
   customUpdate(renderer, res);
 }
 
-void RenderedNode::customRelease()
-{
-
-}
+void RenderedNode::customRelease() {}
 
 void RenderedNode::releaseWithoutRenderTarget()
 {

@@ -1,24 +1,24 @@
 #pragma once
 #include "node.hpp"
+
 #include <QtShaderTools/QShaderBaker>
 struct FilterNode : Node
 {
-  FilterNode(QString frag)
-    : Node{frag}
+  FilterNode(QString frag) : Node{frag}
   {
     const auto& d = m_fragmentS.description();
-    for(auto& ub : d.combinedImageSamplers())
+    for (auto& ub : d.combinedImageSamplers())
     {
       input.push_back(new Port{this, {}, Types::Image, {}});
     }
-    for(auto& ub : d.uniformBlocks())
+    for (auto& ub : d.uniformBlocks())
     {
-      if(ub.blockName != "material_t")
+      if (ub.blockName != "material_t")
         continue;
 
-      for(auto& u : ub.members)
+      for (auto& u : ub.members)
       {
-        switch(u.type)
+        switch (u.type)
         {
           case QShaderDescription::Float:
             input.push_back(new Port{this, {}, Types::Float, {}});
