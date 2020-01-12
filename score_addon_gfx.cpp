@@ -49,7 +49,8 @@ std::vector<std::unique_ptr<score::InterfaceBase>> score_addon_gfx::factories(
          Gfx::Video::DropHandler>,
       FW<Library::LibraryInterface,
          Gfx::Filter::LibraryHandler,
-         Gfx::Video::LibraryHandler>>(ctx, key);
+         Gfx::Video::LibraryHandler>
+      >(ctx, key);
 }
 
 score::GUIApplicationPlugin* score_addon_gfx::make_guiApplicationPlugin(

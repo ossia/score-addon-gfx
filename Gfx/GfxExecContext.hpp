@@ -1,25 +1,26 @@
 #pragma once
-#include <Process/ExecutionContext.hpp>
+#include <Process/ExecutionAction.hpp>
 
 #include <Gfx/GfxContext.hpp>
 
 namespace Gfx
 {
 
-class gfx_exec_context final : public Execution::ExecutionAction
+class GfxExecutionAction final : public Execution::ExecutionAction
 {
+  SCORE_CONCRETE("06f48270-35a4-44d2-929a-e67b8e2904f5")
 public:
-  gfx_exec_context(gfx_window_context& w) : ui{&w} {}
+  GfxExecutionAction(gfx_window_context& w) : ui{&w} {}
   gfx_window_context* ui{};
 
-  void startTick() override { edges.clear(); }
+  void startTick(unsigned long, double) override { edges.clear(); }
 
   void setEdge(port_index source, port_index sink)
   {
     edges.insert({source, sink});
   }
 
-  void endTick() override
+  void endTick(unsigned long, double) override
   {
     if (edges != prev_edges)
     {

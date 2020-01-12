@@ -12,8 +12,8 @@ class gfx_window_context;
 class gfx_protocol : public ossia::net::protocol_base
 {
 public:
-  gfx_protocol(gfx_exec_context& ctx) : context{&ctx} {}
-  gfx_exec_context* context{};
+  gfx_protocol(GfxExecutionAction& ctx) : context{&ctx} {}
+  GfxExecutionAction* context{};
   bool pull(ossia::net::parameter_base&) override { return false; }
   bool push(const ossia::net::parameter_base&, const ossia::value& v) override
   {
@@ -29,7 +29,7 @@ public:
 
 class gfx_parameter : public ossia::net::parameter_base
 {
-  gfx_exec_context* context{};
+  GfxExecutionAction* context{};
 
 public:
   int32_t node_id{};

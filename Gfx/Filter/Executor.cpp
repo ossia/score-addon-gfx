@@ -17,7 +17,7 @@ namespace Gfx::Filter
 class filter_node final : public gfx_exec_node
 {
 public:
-  filter_node(const QString& frag, gfx_exec_context& ctx) : gfx_exec_node{ctx}
+  filter_node(const QString& frag, GfxExecutionAction& ctx) : gfx_exec_node{ctx}
   {
     auto n = std::make_unique<FilterNode>(frag);
 

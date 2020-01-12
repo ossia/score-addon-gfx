@@ -28,8 +28,8 @@ class gfx_exec_node : public ossia::nonowning_graph_node
 {
 public:
   std::vector<std::pair<ossia::value*, bool>> controls;
-  gfx_exec_context* exec_context{};
-  gfx_exec_node(gfx_exec_context& e_ctx) : exec_context{&e_ctx} {}
+  GfxExecutionAction* exec_context{};
+  gfx_exec_node(GfxExecutionAction& e_ctx) : exec_context{&e_ctx} {}
   std::pair<ossia::value*, bool>& add_control()
   {
     auto inletport = new ossia::value_inlet;

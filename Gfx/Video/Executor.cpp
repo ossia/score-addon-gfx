@@ -16,7 +16,7 @@ namespace Gfx::Video
 class video_node final : public gfx_exec_node
 {
 public:
-  video_node(const std::shared_ptr<video_decoder>& dec, gfx_exec_context& ctx)
+  video_node(const std::shared_ptr<video_decoder>& dec, GfxExecutionAction& ctx)
       : gfx_exec_node{ctx}
   {
     switch (dec->pixel_format())

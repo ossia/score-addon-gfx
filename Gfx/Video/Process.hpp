@@ -59,7 +59,7 @@ using ProcessFactory = Process::ProcessFactory_T<Gfx::Video::Model>;
 
 class LibraryHandler final : public Library::LibraryInterface
 {
-  SCORE_CONCRETE("5231ea8b-da66-4c6f-9e34-d9a79cbc494a")
+  SCORE_CONCRETE("be66d573-571f-4c33-9f60-0791f53c7266")
 
   QSet<QString> acceptedFiles() const noexcept override;
 };

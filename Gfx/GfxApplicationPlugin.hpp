@@ -17,7 +17,7 @@ public:
   ~DocumentPlugin() override;
 
   gfx_window_context context;
-  gfx_exec_context exec{context};
+  GfxExecutionAction exec{context};
 };
 
 class ApplicationPlugin final : public score::GUIApplicationPlugin
