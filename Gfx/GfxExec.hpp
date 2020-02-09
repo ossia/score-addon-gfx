@@ -61,7 +61,7 @@ public:
     msg.node_id = id;
     msg.token = tk;
 
-    msg.inputs.resize(this->inputs().size());
+    msg.inputs.resize(this->m_inlets.size());
     int inlet_i = 0;
     for (ossia::inlet* inlet : this->m_inlets)
     {
@@ -71,7 +71,7 @@ public:
         {
           if (src_gfx->executed())
           {
-            int32_t port_idx = index_of(src_gfx->outputs(), cable->out);
+            int32_t port_idx = index_of(src_gfx->m_outlets, cable->out);
             assert(port_idx != -1);
             {
               exec_context->setEdge(

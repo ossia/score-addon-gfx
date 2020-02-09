@@ -17,7 +17,6 @@ TextureInlet::~TextureInlet() {}
 TextureInlet::TextureInlet(Id<Process::Port> c, QObject* parent)
     : Process::Inlet{std::move(c), parent}
 {
-  type = Process::PortType::Texture;
 }
 
 TextureInlet::TextureInlet(DataStream::Deserializer& vis, QObject* parent)
@@ -46,7 +45,6 @@ TextureOutlet::~TextureOutlet() {}
 TextureOutlet::TextureOutlet(Id<Process::Port> c, QObject* parent)
     : Process::Outlet{std::move(c), parent}
 {
-  type = Process::PortType::Texture;
 }
 
 TextureOutlet::TextureOutlet(DataStream::Deserializer& vis, QObject* parent)

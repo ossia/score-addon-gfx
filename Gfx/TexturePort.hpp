@@ -36,6 +36,8 @@ public:
   TextureInlet(JSONObject::Deserializer& vis, QObject* parent);
   TextureInlet(DataStream::Deserializer&& vis, QObject* parent);
   TextureInlet(JSONObject::Deserializer&& vis, QObject* parent);
+
+  VIRTUAL_CONSTEXPR Process::PortType type() const noexcept override { return Process::PortType::Texture; }
 };
 
 class TextureOutlet : public Process::Outlet
@@ -54,6 +56,8 @@ public:
   TextureOutlet(JSONObject::Deserializer& vis, QObject* parent);
   TextureOutlet(DataStream::Deserializer&& vis, QObject* parent);
   TextureOutlet(JSONObject::Deserializer&& vis, QObject* parent);
+
+  VIRTUAL_CONSTEXPR Process::PortType type() const noexcept override { return Process::PortType::Texture; }
 };
 
 struct TextureInletFactory final : public Dataflow::AutomatablePortFactory
