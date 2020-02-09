@@ -13,6 +13,7 @@ extern "C"
 #include <mutex>
 #include <string>
 #include <thread>
+#include <list>
 
 #include <condition_variable>
 
@@ -47,7 +48,7 @@ public:
       return false;
     }
 
-    m_running.store(true, std::memory_order::release);
+    m_running.store(true, std::memory_order_release);
     m_thread = std::thread{[this] { this->buffer_thread(); }};
 
     return true;
@@ -55,6 +56,7 @@ public:
 
   auto width() const noexcept { return m_width; }
   auto height() const noexcept { return m_height; }
+  auto fps() const noexcept { return m_rate; }
 
   auto pixel_format() const noexcept { return m_pixel_format; }
 
@@ -122,7 +124,7 @@ private:
 
   void close_file() noexcept
   {
-    m_running.store(false, std::memory_order::release);
+    m_running.store(false, std::memory_order_release);
 
     if (m_thread.joinable())
       m_thread.join();
@@ -247,6 +249,7 @@ private:
           res = !(avcodec_open2(m_codecContext, m_codec, nullptr) < 0);
           m_width = m_codecContext->coded_width;
           m_height = m_codecContext->coded_height;
+          m_rate = av_q2d(m_formatContext->streams[i]->avg_frame_rate);
         }
 
         break;
@@ -310,6 +313,7 @@ private:
 
   int m_width{};
   int m_height{};
+  double m_rate{};
 
   AVFrame* m_discardUntil{};
   std::atomic_int64_t m_seekTo = -1;

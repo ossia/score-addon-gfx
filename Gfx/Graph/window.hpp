@@ -28,9 +28,7 @@ public:
         setSurfaceType(OpenGLSurface); // not a typo
         break;
       case Metal:
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 12, 0))
         setSurfaceType(MetalSurface);
-#endif
         break;
       default:
         break;
@@ -47,6 +45,7 @@ public:
 
   std::function<void()> onWindowReady;
   std::function<void()> onRender;
+  bool canRender{};
   void init() { onWindowReady(); }
 
   void resizeSwapChain()
@@ -65,8 +64,11 @@ public:
 
   void render()
   {
-    if (!state.hasSwapChain || m_notExposed)
+    if (!state.hasSwapChain || m_notExposed || !canRender)
+    {
+      requestUpdate();
       return;
+    }
 
     if (state.swapChain->currentPixelSize()
             != state.swapChain->surfacePixelSize()
@@ -83,7 +85,10 @@ public:
     {
       resizeSwapChain();
       if (!state.hasSwapChain)
+      {
+        requestUpdate();
         return;
+      }
       r = state.rhi->beginFrame(state.swapChain);
     }
     if (r != QRhi::FrameOpSuccess)

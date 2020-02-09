@@ -55,6 +55,7 @@ struct YUV420Node : Node
   struct Rendered : RenderedNode
   {
     using RenderedNode::RenderedNode;
+    QElapsedTimer t;
 
     void customInit(Renderer& renderer) override
     {
@@ -115,13 +116,17 @@ struct YUV420Node : Node
     customUpdate(Renderer& renderer, QRhiResourceUpdateBatch& res) override
     {
       auto& decoder = *static_cast<const YUV420Node&>(node).decoder;
-      if (auto frame = decoder.dequeue_frame())
+      if(!t.isValid() || t.elapsed() > (1000. / decoder.fps()))
       {
-        setYPixels(renderer, res, frame->data[0], frame->linesize[0]);
-        setUPixels(renderer, res, frame->data[1], frame->linesize[1]);
-        setVPixels(renderer, res, frame->data[2], frame->linesize[2]);
+        if (auto frame = decoder.dequeue_frame())
+        {
+          setYPixels(renderer, res, frame->data[0], frame->linesize[0]);
+          setUPixels(renderer, res, frame->data[1], frame->linesize[1]);
+          setVPixels(renderer, res, frame->data[2], frame->linesize[2]);
 
-        av_frame_free(&frame);
+          av_frame_free(&frame);
+        }
+        t.restart();
       }
     }
 
@@ -205,6 +210,7 @@ struct RGB0Node : Node
   struct Rendered : RenderedNode
   {
     using RenderedNode::RenderedNode;
+    QElapsedTimer t;
 
     void customInit(Renderer& renderer) override
     {
@@ -232,12 +238,16 @@ struct RGB0Node : Node
     customUpdate(Renderer& renderer, QRhiResourceUpdateBatch& res) override
     {
       auto& decoder = *static_cast<const RGB0Node&>(node).decoder;
-
-      if (auto frame = decoder.dequeue_frame())
+      if(!t.isValid() || t.elapsed() > (1000. / decoder.fps()))
       {
-        setPixels(renderer, res, frame->data[0], frame->linesize[0]);
+        qDebug() << decoder.fps();
+        if (auto frame = decoder.dequeue_frame())
+        {
+          setPixels(renderer, res, frame->data[0], frame->linesize[0]);
 
-        av_frame_free(&frame);
+          av_frame_free(&frame);
+        }
+        t.restart();
       }
     }
 

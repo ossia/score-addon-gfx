@@ -30,7 +30,7 @@ enum GraphicsApi
   D3D11,
   Metal
 };
-
+class Window;
 class QOffscreenSurface;
 struct RenderState
 {
@@ -38,6 +38,7 @@ struct RenderState
   QRhiSwapChain* swapChain{};
   QRhiRenderPassDescriptor* renderPassDescriptor{};
   QRhiRenderBuffer* renderBuffer{};
+  Window* window{};
 
   QOffscreenSurface* surface{};
   bool hasSwapChain = false;
@@ -45,6 +46,8 @@ struct RenderState
   static RenderState create(QWindow& window, GraphicsApi graphicsApi)
   {
     RenderState state;
+
+    state.window = reinterpret_cast<Window*>(&window);
     if (graphicsApi == Null)
     {
       QRhiNullInitParams params;
@@ -91,6 +94,8 @@ struct RenderState
     {
       QRhiMetalInitParams params;
       state.rhi = QRhi::create(QRhi::Metal, &params, 0);
+      if (!state.rhi)
+        qFatal("Failed to create METAL backend");
     }
 #endif
 
@@ -134,3 +139,4 @@ struct RenderState
     surface = nullptr;
   }
 };
+

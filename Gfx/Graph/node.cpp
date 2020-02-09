@@ -57,7 +57,7 @@ void Node::setShaders(QString vert, QString frag)
       {QShader::GlslShader,
        120}, // Only GLSL version supported by RHI right now.
       {QShader::HlslShader, 100},
-      {QShader::MslShader, 100},
+      {QShader::MslShader, QShaderVersion(12)},
   });
   b.setGeneratedShaderVariants({QShader::Variant{},
                                 QShader::Variant{},

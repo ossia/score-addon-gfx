@@ -50,10 +50,14 @@ void Graph::setupOutputs(GraphicsApi graphicsApi)
   }
 #endif
 
+#if __APPLE__
+      graphicsApi = Metal;
+#endif
   for (auto output : outputs)
   {
     if (output->window)
     {
+      output->window->canRender = false;
       output->window->onRender = [] {};
       ////output->window->state.hasSwapChain = false;
     }
@@ -172,6 +176,7 @@ void Graph::relinkGraph()
         rn->release();
       }
     }
+    r.state.window->canRender = r.renderedNodes.size() > 1;
   }
 }
 
@@ -215,6 +220,7 @@ void Graph::createRenderer(OutputNode* output, RenderState state)
   // Except the last one which is going to render to screen
   r.renderedNodes.back()->setScreenRenderTarget(r.state);
 
+  output->window->canRender = r.renderedNodes.size() > 1;
   renderers.push_back(std::move(r));
 
   {
