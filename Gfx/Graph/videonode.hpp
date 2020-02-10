@@ -6,7 +6,7 @@
 #include "uniforms.hpp"
 #include "videodecoder.hpp"
 
-struct YUV420Node : Node
+struct YUV420Node : NodeModel
 {
   std::shared_ptr<video_decoder> decoder;
 
@@ -47,7 +47,7 @@ struct YUV420Node : Node
   })_";
 
   YUV420Node(std::shared_ptr<video_decoder> dec)
-      : Node{filter}, decoder{std::move(dec)}
+      : NodeModel{filter}, decoder{std::move(dec)}
   {
     output.push_back(new Port{this, {}, Types::Image, {}});
   }
@@ -186,7 +186,7 @@ struct YUV420Node : Node
   }
 };
 
-struct RGB0Node : Node
+struct RGB0Node : NodeModel
 {
   std::shared_ptr<video_decoder> decoder;
 
@@ -268,7 +268,7 @@ struct RGB0Node : Node
   };
 
   RGB0Node(std::shared_ptr<video_decoder> dec)
-      : Node{filter}, decoder{std::move(dec)}
+      : NodeModel{filter}, decoder{std::move(dec)}
   {
     output.push_back(new Port{this, {}, Types::Image, {}});
   }

@@ -80,11 +80,11 @@ struct RenderState
     {
       QRhiD3D11InitParams params;
       params.enableDebugLayer = true;
-      if (framesUntilTdr > 0)
-      {
-        params.framesUntilKillingDeviceViaTdr = framesUntilTdr;
-        params.repeatDeviceKill = true;
-      }
+      // if (framesUntilTdr > 0)
+      // {
+      //   params.framesUntilKillingDeviceViaTdr = framesUntilTdr;
+      //   params.repeatDeviceKill = true;
+      // }
       state.rhi = QRhi::create(QRhi::D3D11, &params, 0);
     }
 #endif

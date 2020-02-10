@@ -2,9 +2,9 @@
 #include "node.hpp"
 
 #include <QtShaderTools/QShaderBaker>
-struct FilterNode : Node
+struct FilterNode : NodeModel
 {
-  FilterNode(QString frag) : Node{frag}
+  FilterNode(QString frag) : NodeModel{frag}
   {
     const auto& d = m_fragmentS.description();
     for (auto& ub : d.combinedImageSamplers())

@@ -7,12 +7,12 @@ struct OutputNode;
 class Window;
 struct Graph
 {
-  std::vector<Node*> nodes;
+  std::vector<NodeModel*> nodes;
   std::vector<Edge*> edges;
 
-  void addNode(Node* n) { nodes.push_back(n); }
+  void addNode(NodeModel* n) { nodes.push_back(n); }
 
-  void removeNode(Node* n)
+  void removeNode(NodeModel* n)
   {
     if (auto it = ossia::find(nodes, n); it != nodes.end())
     {

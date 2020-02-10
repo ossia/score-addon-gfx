@@ -4,7 +4,7 @@
 #include "uniforms.hpp"
 
 class Window;
-struct OutputNode : Node
+struct OutputNode : NodeModel
 {
   static const constexpr auto filter = R"_(#version 450
     layout(location = 0) in vec2 v_texcoord;
@@ -23,10 +23,10 @@ struct OutputNode : Node
   std::shared_ptr<Window> window{};
 
 protected:
-  OutputNode() : Node{filter} {}
+  OutputNode() : NodeModel{filter} {}
 };
 
-struct ColorNode : Node
+struct ColorNode : NodeModel
 {
   static const constexpr auto filter = R"_(#version 450
     layout(location = 0) in vec2 v_texcoord;
@@ -43,7 +43,7 @@ struct ColorNode : Node
     }
     )_";
 
-  ColorNode() : Node{filter}
+  ColorNode() : NodeModel{filter}
   {
     input.push_back(new Port{this, {}, Types::Vec4, {}});
     input.back()->value = ossia::vec4f{0.6, 0.3, 0.78, 1.};
@@ -53,7 +53,7 @@ struct ColorNode : Node
   virtual ~ColorNode();
 };
 
-struct NoiseNode : Node
+struct NoiseNode : NodeModel
 {
   static const constexpr auto filter = R"_(#version 450
     layout(location = 0) in vec2 v_texcoord;
@@ -65,14 +65,14 @@ struct NoiseNode : Node
     }
     )_";
 
-  NoiseNode() : Node{filter}
+  NoiseNode() : NodeModel{filter}
   {
     output.push_back(new Port{this, {}, Types::Image, {}});
   }
   virtual ~NoiseNode();
 };
 
-struct ProductNode : Node
+struct ProductNode : NodeModel
 {
   static const constexpr auto filter = R"_(#version 450
     layout(location = 0) in vec2 v_texcoord;
@@ -88,7 +88,7 @@ struct ProductNode : Node
         fragColor = c1 + c2;
     }
     )_";
-  ProductNode() : Node{filter}
+  ProductNode() : NodeModel{filter}
   {
     input.push_back(new Port{this, {}, Types::Image, {}});
     input.push_back(new Port{this, {}, Types::Image, {}});

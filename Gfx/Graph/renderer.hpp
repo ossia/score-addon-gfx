@@ -22,7 +22,7 @@ struct
 
 struct Renderer
 {
-  std::vector<Node*> nodes;
+  std::vector<NodeModel*> nodes;
   std::vector<RenderedNode*> renderedNodes;
 
   RenderState state;

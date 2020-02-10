@@ -12,7 +12,12 @@ void Renderer::init(QRhi& rhi)
   m_vertexBuffer->build();
 
   m_rendererUBO = rhi.newBuffer(
-      QRhiBuffer::Immutable, QRhiBuffer::UniformBuffer, sizeof(ScreenUBO));
+      #if defined(_WIN32)
+      QRhiBuffer::Dynamic,
+      #else
+        QRhiBuffer::Immutable,
+      #endif
+        QRhiBuffer::UniformBuffer, sizeof(ScreenUBO));
   m_rendererUBO->build();
 
   m_emptyTexture = rhi.newTexture(
@@ -103,7 +108,7 @@ void Renderer::update(QRhiResourceUpdateBatch& res)
         m_vertexBuffer, 0, m_vertexBuffer->size(), Mesh::vertexArray);
 
     const auto proj = state.rhi->clipSpaceCorrMatrix();
-    float texCoordAdjust[2];
+
     if (!state.rhi->isYUpInFramebuffer())
     {
       screenUBO.texcoordAdjust[0] = 1.f;
@@ -118,8 +123,11 @@ void Renderer::update(QRhiResourceUpdateBatch& res)
 
     screenUBO.renderSize[0] = this->lastSize.width();
     screenUBO.renderSize[1] = this->lastSize.height();
-
+#if defined(_WIN32)
+    res.updateDynamicBuffer(m_rendererUBO, 0, sizeof(ScreenUBO), &screenUBO);
+#else
     res.uploadStaticBuffer(m_rendererUBO, 0, sizeof(ScreenUBO), &screenUBO);
+#endif
   }
 }
 

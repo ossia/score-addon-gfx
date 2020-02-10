@@ -40,7 +40,7 @@ struct gfx_message
 
 struct gfx_view_node
 {
-  std::unique_ptr<Node> impl;
+  std::unique_ptr<NodeModel> impl;
 
   void process(const ossia::token_request& tk)
   {
@@ -89,10 +89,10 @@ struct gfx_view_node
       ValueVariant& value;
       void operator()() const noexcept {}
       void operator()(ossia::impulse) const noexcept {}
-      void operator()(int v) const noexcept { value = v; }
+      void operator()(int v) const noexcept { value = (float)v; }
       void operator()(float v) const noexcept { value = v; }
-      void operator()(bool v) const noexcept { value = v; }
-      void operator()(char v) const noexcept { value = v; }
+      void operator()(bool v) const noexcept { value = (float)v; }
+      void operator()(char v) const noexcept { value = (float)v; }
       void operator()(const std::string& v) const noexcept {}
       void operator()(ossia::vec2f v) const noexcept { value = v; }
       void operator()(ossia::vec3f v) const noexcept { value = v; }
@@ -162,7 +162,7 @@ public:
     // Qt::QueuedConnection);
   }
 
-  int32_t register_node(std::unique_ptr<Node> node)
+  int32_t register_node(std::unique_ptr<NodeModel> node)
   {
     auto next = index;
     m_graph->addNode(node.get());

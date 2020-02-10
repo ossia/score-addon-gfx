@@ -9,13 +9,14 @@
 #include <algorithm>
 #include <vector>
 
-class Node;
+
+class NodeModel;
 struct Port;
 struct Edge;
 
 struct Port
 {
-  Node* node{};
+  NodeModel* node{};
   ValueVariant value;
   Types type{};
   std::vector<Edge*> edges;
@@ -71,15 +72,15 @@ struct
 
 struct Renderer;
 class RenderedNode;
-class Node
+class NodeModel
 {
   friend class RenderedNode;
 
 public:
-  explicit Node();
-  explicit Node(QString frag);
-  explicit Node(QString vert, QString frag);
-  virtual ~Node();
+  explicit NodeModel();
+  explicit NodeModel(QString frag);
+  explicit NodeModel(QString vert, QString frag);
+  virtual ~NodeModel();
 
   virtual RenderedNode* createRenderer() const noexcept;
 
@@ -103,10 +104,10 @@ public:
 class RenderedNode
 {
 public:
-  RenderedNode(const Node& node) noexcept : node{node} {}
+  RenderedNode(const NodeModel& node) noexcept : node{node} {}
 
   virtual ~RenderedNode() {}
-  const Node& node;
+  const NodeModel& node;
 
   QRhiTexture* m_texture{};
   QRhiRenderTarget* m_renderTarget{};

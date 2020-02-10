@@ -6,7 +6,7 @@
 
 #include <score/tools/Debug.hpp>
 
-static void graphwalk(Node* node, std::vector<Node*>& list)
+static void graphwalk(NodeModel* node, std::vector<NodeModel*>& list)
 {
   for (auto inputs : node->input)
   {
@@ -53,6 +53,10 @@ void Graph::setupOutputs(GraphicsApi graphicsApi)
 #if __APPLE__
       graphicsApi = Metal;
 #endif
+#ifdef Q_OS_WIN
+      graphicsApi = D3D11;
+#endif
+
   for (auto output : outputs)
   {
     if (output->window)
@@ -228,7 +232,7 @@ void Graph::createRenderer(OutputNode* output, RenderState state)
     // Register the rendered nodes with their parents
     for (auto rn : r.renderedNodes)
     {
-      const_cast<Node&>(rn->node).renderedNodes[&r] = rn;
+      const_cast<NodeModel&>(rn->node).renderedNodes[&r] = rn;
     }
 
     r.init(*r.state.rhi);

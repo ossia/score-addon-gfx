@@ -1,9 +1,9 @@
 #include "filternode.hpp"
 #include "window.hpp"
 
-Node::~Node() {}
+NodeModel::~NodeModel() {}
 
-RenderedNode* Node::createRenderer() const noexcept
+RenderedNode* NodeModel::createRenderer() const noexcept
 {
   return new RenderedNode{*this};
 }

@@ -4,14 +4,14 @@
 #include "mesh.hpp"
 #include "renderer.hpp"
 
-Node::Node() {}
+NodeModel::NodeModel() {}
 
-Node::Node(QString frag)
+NodeModel::NodeModel(QString frag)
 {
   setShaders(Mesh::vertexShader, frag);
 }
 
-Node::Node(QString vert, QString frag)
+NodeModel::NodeModel(QString vert, QString frag)
 {
   setShaders(vert, frag);
 }
@@ -44,7 +44,7 @@ void RenderedNode::setScreenRenderTarget(RenderState state)
 
 void RenderedNode::customInit(Renderer& renderer) {}
 
-void Node::setShaders(QString vert, QString frag)
+void NodeModel::setShaders(QString vert, QString frag)
 {
   // Here we use the QtShaderTools (qtlabs) module to generate shaders
   // at run-time.
@@ -54,9 +54,8 @@ void Node::setShaders(QString vert, QString frag)
 
   b.setGeneratedShaders({
       {QShader::SpirvShader, 100},
-      {QShader::GlslShader,
-       120}, // Only GLSL version supported by RHI right now.
-      {QShader::HlslShader, 100},
+      {QShader::GlslShader, 120}, // Only GLSL version supported by RHI right now.
+      {QShader::HlslShader, QShaderVersion(50)},
       {QShader::MslShader, QShaderVersion(12)},
   });
   b.setGeneratedShaderVariants({QShader::Variant{},
