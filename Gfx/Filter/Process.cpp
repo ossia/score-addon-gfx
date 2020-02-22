@@ -91,11 +91,10 @@ void Model::setFragment(QString f)
   b.setSourceString(m_fragment.toLatin1(), QShader::Stage::FragmentStage);
 
   b.setGeneratedShaders({
-      {QShader::SpirvShader, 100},
-      {QShader::GlslShader,
-       120}, // Only GLSL version supported by RHI right now.
-      {QShader::HlslShader, 100},
-      {QShader::MslShader, 100},
+             {QShader::SpirvShader, 100},
+             {QShader::GlslShader, 120}, // Only GLSL version supported by RHI right now.
+             {QShader::HlslShader, QShaderVersion(50)},
+             {QShader::MslShader, QShaderVersion(12)},
   });
 
   int i = 0;
