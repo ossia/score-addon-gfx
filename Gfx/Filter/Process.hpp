@@ -32,7 +32,7 @@ public:
   ~Model() override;
 
   QString fragment() const noexcept { return m_fragment; }
-  void setFragment(const QString& f);
+  void setFragment(QString f);
   void fragmentChanged(const QString& f) W_SIGNAL(fragmentChanged, f);
 
   PROPERTY(

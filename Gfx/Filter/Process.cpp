@@ -10,7 +10,7 @@
 #include <Gfx/Graph/nodes.hpp>
 #include <Gfx/TexturePort.hpp>
 #include <wobjectimpl.h>
-
+#include <isf.hpp>
 W_OBJECT_IMPL(Gfx::Filter::Model)
 namespace Gfx::Filter
 {
@@ -25,50 +25,63 @@ Model::Model(
   m_outlets.push_back(new TextureOutlet{Id<Process::Port>(0), this});
 
   setFragment(R"_(#version 450
-    layout(location = 0) in vec2 v_texcoord;
-    layout(location = 0) out vec4 fragColor;
+layout(location = 0) in vec2 v_texcoord;
+layout(location = 0) out vec4 fragColor;
 
-    // Shared uniform buffer for the whole render window
-    layout(std140, binding = 0) uniform renderer_t {
-      mat4 mvp;
-      vec2 texcoordAdjust;
+// Shared uniform buffer for the whole render window
+layout(std140, binding = 0) uniform renderer_t {
+  mat4 mvp;
+  vec2 texcoordAdjust;
 
-      vec2 renderSize;
-    } renderer;
+  vec2 renderSize;
+};
 
-    // Time-dependent uniforms, only relevant during execution
-    layout(std140, binding = 1) uniform process_t {
-      float time;
-      float timeDelta;
-      float progress;
+// Time-dependent uniforms, only relevant during execution
+layout(std140, binding = 1) uniform process_t {
+  float time;
+  float timeDelta;
+  float progress;
 
-      int passIndex;
-    } process;
+  int passIndex;
+  int frameIndex;
 
-    // Everything here will be exposed as UI controls
-    layout(std140, binding = 2) uniform material_t {
-      vec4 color;
-    } material;
+  vec4 date;
+  vec4 mouse;
+  vec4 channelTime;
+
+  float sampleRate;
+};
+
+// Everything here will be exposed as UI controls
+layout(std140, binding = 2) uniform material_t {
+  vec4 color;
+};
 
 
-    void main()
-    {
-      // Important : texture origin depends on the graphics API used (Vulkan, D3D, etc).
-      // Thus the following adjustment is required :
-      vec2 texcoord = vec2(v_texcoord.x, renderer.texcoordAdjust.y + renderer.texcoordAdjust.x * v_texcoord.y);
+void main()
+{
+  // Important : texture origin depends on the graphics API used (Vulkan, D3D, etc).
+  // Thus the following adjustment is required :
+  vec2 texcoord = vec2(v_texcoord.x, texcoordAdjust.y + texcoordAdjust.x * v_texcoord.y);
 
-      fragColor = vec4(material.color.rgb * (1+sin(process.progress * 100))/2. * texcoord.xxy, 1.);
-    }
-  )_");
+  fragColor = vec4(color.rgb * (1+sin(progress * 100))/2. * texcoord.xxy, 1.);
+})_");
 }
 
 Model::~Model() {}
 
-void Model::setFragment(const QString& f)
+void Model::setFragment(QString f)
 {
+  {
+    isf::parser p{{}, f.toStdString()};
+    f = QString::fromStdString(p.fragment());
+    qDebug() << f;
+  }
+
   if (f == m_fragment)
     return;
   m_fragment = f;
+
 
   for (auto inlet : m_inlets)
     delete inlet;

@@ -10,6 +10,8 @@ if(NOT TARGET avformat)
   find_package(FFmpeg COMPONENTS  AVCODEC AVFORMAT AVUTIL)
 endif()
 
+add_subdirectory(3rdparty/libisf)
+
 # Source files
 set(HDRS
     Gfx/CommandFactory.hpp
@@ -99,7 +101,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
    Qt5::ShaderTools  Qt5::GuiPrivate
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE
-  avcodec avformat swresample avutil)
+  avcodec avformat swresample avutil isf)
 
 # Target-specific options
 setup_score_plugin(${PROJECT_NAME})

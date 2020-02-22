@@ -61,10 +61,16 @@ struct
 {
   float time{};
   float timeDelta{};
-
   float progress{};
 
   int32_t passIndex{};
+  int32_t frameIndex{};
+
+  float date[4]{0.f, 0.f, 0.f, 0.f};
+  float mouse[4]{0.5f, 0.5f, 0.5f, 0.5f};
+  float channelTime[4]{0.5f, 0.5f, 0.5f, 0.5f};
+
+  float sampleRate{};
 };
 #if defined(_MSC_VER)
 #pragma pack()
