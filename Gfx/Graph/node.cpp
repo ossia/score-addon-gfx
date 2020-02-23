@@ -16,13 +16,16 @@ NodeModel::NodeModel(QString vert, QString frag)
   setShaders(vert, frag);
 }
 
-void RenderedNode::createRenderTarget(RenderState state)
+void RenderedNode::createRenderTarget(const RenderState& state)
 {
+  auto sz = state.swapChain->surfacePixelSize();
+  if(auto true_sz = renderTargetSize())
+  {
+    sz = *true_sz;
+  }
+
   m_texture = state.rhi->newTexture(
-      QRhiTexture::RGBA8,
-      state.swapChain->surfacePixelSize(),
-      1,
-      QRhiTexture::RenderTarget);
+      QRhiTexture::RGBA8, sz, 1, QRhiTexture::RenderTarget);
   m_texture->build();
 
   QRhiColorAttachment color0{m_texture};
@@ -36,25 +39,26 @@ void RenderedNode::createRenderTarget(RenderState state)
   this->m_renderTarget = renderTarget;
 }
 
-void RenderedNode::setScreenRenderTarget(RenderState state)
+void RenderedNode::setScreenRenderTarget(const RenderState& state)
 {
   m_renderTarget = state.swapChain->currentFrameRenderTarget();
   m_renderPass = state.renderPassDescriptor;
+}
+
+std::optional<QSize> RenderedNode::renderTargetSize() const noexcept
+{
+  return {};
 }
 
 void RenderedNode::customInit(Renderer& renderer) {}
 
 void NodeModel::setShaders(QString vert, QString frag)
 {
-  // Here we use the QtShaderTools (qtlabs) module to generate shaders
-  // at run-time.
-  // The recommended way forwartd for Qt6 however is to bake them
-  // at compile time with the QSB tool.
   QShaderBaker b;
 
   b.setGeneratedShaders({
       {QShader::SpirvShader, 100},
-      {QShader::GlslShader, 120}, // Only GLSL version supported by RHI right now.
+      {QShader::GlslShader, 120},
       {QShader::HlslShader, QShaderVersion(50)},
       {QShader::MslShader, QShaderVersion(12)},
   });
@@ -70,6 +74,10 @@ void NodeModel::setShaders(QString vert, QString frag)
   b.setSourceString(frag.toLatin1(), QShader::FragmentStage);
   m_fragmentS = b.bake();
   qDebug() << b.errorMessage();
+  if(!b.errorMessage().isEmpty())
+  {
+    qDebug() << frag.toStdString().data();
+  }
 
   Q_ASSERT(m_vertexS.isValid());
   Q_ASSERT(m_fragmentS.isValid());
@@ -139,26 +147,18 @@ void RenderedNode::init(Renderer& renderer)
   customInit(renderer);
   // Build the pipeline
   {
-    // Pipeline setup : thiis is what contains the rendering states, the
-    // shaders, etc
     m_ps = rhi.newGraphicsPipeline();
     ensure(m_ps);
 
-    QRhiGraphicsPipeline::TargetBlend
-        premulAlphaBlend; // convenient defaults...
+    QRhiGraphicsPipeline::TargetBlend premulAlphaBlend;
     premulAlphaBlend.enable = true;
     m_ps->setTargetBlends({premulAlphaBlend});
 
     m_ps->setSampleCount(1);
 
     m_ps->setDepthTest(false);
-    // m_ps->setDepthOp(QRhiGraphicsPipeline::Always);
     m_ps->setDepthWrite(false);
-    // m_ps->setCullMode(QRhiGraphicsPipeline::Back);
 
-    // Shader setup
-
-    // Setup the pipeline with the material-specific information
     m_ps->setShaderStages({{QRhiShaderStage::Vertex, node.m_vertexS},
                            {QRhiShaderStage::Fragment, node.m_fragmentS}});
 
@@ -178,14 +178,12 @@ void RenderedNode::init(Renderer& renderer)
     const auto bindingStages = QRhiShaderResourceBinding::VertexStage
                                | QRhiShaderResourceBinding::FragmentStage;
 
-    // We always have a default binding at location 0 for the MVP matrix.
     {
       const auto rendererBinding = QRhiShaderResourceBinding::uniformBuffer(
           0, bindingStages, renderer.m_rendererUBO);
       bindings.push_back(rendererBinding);
     }
 
-    // And another one at location 1 for time, etc
     {
       const auto standardUniformBinding
           = QRhiShaderResourceBinding::uniformBuffer(
@@ -215,7 +213,6 @@ void RenderedNode::init(Renderer& renderer)
     }
     m_srb->setBindings(bindings.begin(), bindings.end());
     ensure(m_srb->build());
-    // From now on we can't change bindings anymore without rebuilding.
 
     m_ps->setShaderResourceBindings(m_srb);
 
@@ -257,18 +254,25 @@ void RenderedNode::update(Renderer& renderer, QRhiResourceUpdateBatch& res)
           break;
         case Types::Vec2:
           if (auto v = std::get_if<ossia::vec2f>(&in->value))
-            memcpy(cur, v, 8);
+            memcpy(cur, v->data(), 8);
           cur += 8;
           break;
         case Types::Vec3:
           if (auto v = std::get_if<ossia::vec3f>(&in->value))
-            memcpy(cur, v, 12);
+            memcpy(cur, v->data(), 12);
           cur += 12;
           break;
         case Types::Vec4:
           if (auto v = std::get_if<ossia::vec4f>(&in->value))
-            memcpy(cur, v, 16);
-          cur += 16;
+          {
+            memcpy(cur, v->data(), 16);
+            cur += 16;
+          }
+          else
+          {
+            ossia::vec4f tex{0, 0, 1280, 720};
+            memcpy(cur, tex.data(), 16);
+          }
           break;
         case Types::Image:
           break;

@@ -240,7 +240,6 @@ struct RGB0Node : NodeModel
       auto& decoder = *static_cast<const RGB0Node&>(node).decoder;
       if(!t.isValid() || t.elapsed() > (1000. / decoder.fps()))
       {
-        qDebug() << decoder.fps();
         if (auto frame = decoder.dequeue_frame())
         {
           setPixels(renderer, res, frame->data[0], frame->linesize[0]);
@@ -265,6 +264,13 @@ struct RGB0Node : NodeModel
       QRhiTextureUploadDescription desc{entry};
       res.uploadTexture(y_tex, desc);
     }
+
+    std::optional<QSize> renderTargetSize() const noexcept override
+    {
+      auto& decoder = *static_cast<const RGB0Node&>(node).decoder;
+      const auto w = decoder.width(), h = decoder.height();
+      return QSize{w, h};
+    }
   };
 
   RGB0Node(std::shared_ptr<video_decoder> dec)
@@ -279,4 +285,5 @@ struct RGB0Node : NodeModel
   {
     return new Rendered{*this};
   }
+
 };

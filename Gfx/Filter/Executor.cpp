@@ -37,7 +37,7 @@ ProcessExecutorComponent::ProcessExecutorComponent(
     : ProcessComponent_T{element, ctx, id, "gfxExecutorComponent", parent}
 {
   auto n = std::make_shared<filter_node>(
-      element.fragment(), ctx.doc.plugin<DocumentPlugin>().exec);
+      element.processedFragment(), ctx.doc.plugin<DocumentPlugin>().exec);
 
   int i = 0;
   for (auto& ctl : element.inlets())

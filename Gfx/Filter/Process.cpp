@@ -70,23 +70,138 @@ void main()
 
 Model::~Model() {}
 
+
 void Model::setFragment(QString f)
 {
-  {
-    isf::parser p{{}, f.toStdString()};
-    f = QString::fromStdString(p.fragment());
-    qDebug() << f;
-  }
-
   if (f == m_fragment)
     return;
   m_fragment = f;
-
 
   for (auto inlet : m_inlets)
     delete inlet;
   m_inlets.clear();
 
+  try {
+    isf::parser p{{}, f.toStdString()};
+    auto isfprocessed = QString::fromStdString(p.fragment());
+    if(isfprocessed != f)
+    {
+      m_processedFragment = isfprocessed;
+      setupIsf(p.data());
+
+      inletsChanged();
+      outletsChanged();
+
+      return;
+    }
+  } catch(...) {
+  }
+
+  m_processedFragment = m_fragment;
+  setupNormalShader();
+
+  inletsChanged();
+  outletsChanged();
+}
+
+QString Model::prettyName() const noexcept
+{
+  return tr("GFX Filter");
+}
+
+void Model::setupIsf(const isf::descriptor& desc)
+{
+  int i = 0;
+  using namespace isf;
+  struct input_vis {
+    const isf::input& input;
+    const int i;
+    Model& self;
+
+    Process::Inlet* operator()(const float_input& v)
+    {
+      return new Process::FloatSlider(
+          v.min, v.max, v.def,
+          QString::fromStdString(input.name),
+          Id<Process::Port>(i), &self);
+    }
+
+    Process::Inlet* operator()(const long_input& v)
+    {
+      std::vector<std::pair<QString, ossia::value>> alternatives;
+      for(std::size_t i = 0; i < v.values.size() && i < v.labels.size(); i++)
+      {
+        alternatives.emplace_back(QString::fromStdString(v.labels[i]), (int)v.values[i]);
+      }
+      return new Process::ComboBox(
+          std::move(alternatives), (int) v.def,
+          QString::fromStdString(input.name),
+          Id<Process::Port>(i), &self);
+    }
+    Process::Inlet* operator()(const event_input& v)
+    {
+      return new Process::Button(
+          QString::fromStdString(input.name),
+          Id<Process::Port>(i), &self);
+    }
+    Process::Inlet* operator()(const bool_input& v)
+    {
+      return new Process::Toggle(
+          v.def,
+          QString::fromStdString(input.name),
+          Id<Process::Port>(i), &self);
+    }
+    Process::Inlet* operator()(const point2d_input& v)
+    {
+      return new Process::ControlInlet{Id<Process::Port>(i), &self};
+    }
+    Process::Inlet* operator()(const point3d_input& v)
+    {
+      return new Process::ControlInlet{Id<Process::Port>(i), &self};
+    }
+    Process::Inlet* operator()(const color_input& v)
+    {
+      ossia::vec4f init{0.5, 0.5, 0.5, 1.};
+      if(v.def)
+      {
+        std::copy_n(v.def->begin(), 4, init.begin());
+      }
+      return new Process::HSVSlider(
+          init,
+          QString::fromStdString(input.name),
+          Id<Process::Port>(i), &self);
+    }
+    Process::Inlet* operator()(const image_input& v)
+    {
+      return new Gfx::TextureInlet(
+          Id<Process::Port>(i), &self);
+    }
+    Process::Inlet* operator()(const audio_input& v)
+    {
+      return new Process::AudioInlet(
+          Id<Process::Port>(i), &self);
+    }
+    Process::Inlet* operator()(const audioFFT_input& v)
+    {
+      return new Process::AudioInlet(
+          Id<Process::Port>(i), &self);
+    }
+  };
+
+  for(const isf::input& input : desc.inputs)
+  {
+    auto inlet = std::visit(input_vis{input, i, *this}, input.data);
+    if(inlet)
+    {
+      m_inlets.push_back(inlet);
+      controlAdded(inlet->id());
+    }
+    i++;
+  }
+}
+
+void Model::setupNormalShader()
+{
   QShaderBaker b;
   b.setSourceString(m_fragment.toLatin1(), QShader::Stage::FragmentStage);
 
@@ -124,11 +239,14 @@ void Model::setFragment(QString f)
           controlAdded(m_inlets.back()->id());
           break;
         case QShaderDescription::Vec4:
-          m_inlets.push_back(
-              new Process::HSVSlider{Id<Process::Port>(i++), this});
-          m_inlets.back()->hidden = true;
-          m_inlets.back()->setCustomData(u.name);
-          controlAdded(m_inlets.back()->id());
+          if(!u.name.contains("_imgRect"))
+          {
+            m_inlets.push_back(
+                  new Process::HSVSlider{Id<Process::Port>(i++), this});
+            m_inlets.back()->hidden = true;
+            m_inlets.back()->setCustomData(u.name);
+            controlAdded(m_inlets.back()->id());
+          }
           break;
         default:
           m_inlets.push_back(
@@ -140,14 +258,6 @@ void Model::setFragment(QString f)
       }
     }
   }
-
-  inletsChanged();
-  outletsChanged();
-}
-
-QString Model::prettyName() const noexcept
-{
-  return tr("GFX Filter");
 }
 
 void Model::startExecution() {}

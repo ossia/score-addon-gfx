@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <vector>
+#include <optional>
 
 
 class NodeModel;
@@ -133,9 +134,10 @@ public:
   friend struct Graph;
   friend struct Renderer;
 
-  void createRenderTarget(RenderState state);
-  void setScreenRenderTarget(RenderState state);
+  void createRenderTarget(const RenderState& state);
+  void setScreenRenderTarget(const RenderState& state);
 
+  virtual std::optional<QSize> renderTargetSize() const noexcept;
   // Render loop
   virtual void customInit(Renderer& renderer);
   void init(Renderer& renderer);

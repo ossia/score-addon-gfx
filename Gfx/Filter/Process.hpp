@@ -9,6 +9,10 @@
 #include <Gfx/CommandFactory.hpp>
 #include <Gfx/Filter/Metadata.hpp>
 
+namespace isf
+{
+struct descriptor;
+}
 namespace Gfx::Filter
 {
 class Model final : public Process::ProcessModel
@@ -32,6 +36,7 @@ public:
   ~Model() override;
 
   QString fragment() const noexcept { return m_fragment; }
+  QString processedFragment() const noexcept { return m_processedFragment; }
   void setFragment(QString f);
   void fragmentChanged(const QString& f) W_SIGNAL(fragmentChanged, f);
 
@@ -39,6 +44,8 @@ public:
       QString,
       fragment READ fragment WRITE setFragment NOTIFY fragmentChanged)
 private:
+  void setupIsf(const isf::descriptor& d);
+  void setupNormalShader();
   QString prettyName() const noexcept override;
   void startExecution() override;
   void stopExecution() override;
@@ -49,6 +56,7 @@ private:
   void setDurationAndShrink(const TimeVal& newDuration) noexcept override;
 
   QString m_fragment;
+  QString m_processedFragment;
 };
 
 using ProcessFactory = Process::ProcessFactory_T<Gfx::Filter::Model>;
