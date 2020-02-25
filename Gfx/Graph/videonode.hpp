@@ -130,6 +130,12 @@ struct YUV420Node : NodeModel
       }
     }
 
+    void customRelease() override
+    {
+      for(auto [sampler, tex] : m_samplers)
+        tex->releaseAndDestroyLater();
+    }
+
     void setYPixels(
         Renderer& renderer,
         QRhiResourceUpdateBatch& res,
@@ -248,6 +254,12 @@ struct RGB0Node : NodeModel
         }
         t.restart();
       }
+    }
+
+    void customRelease() override
+    {
+      for(auto [sampler, tex] : m_samplers)
+        tex->releaseAndDestroyLater();
     }
 
     void setPixels(

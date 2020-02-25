@@ -9,6 +9,7 @@
 #include <Gfx/GfxDevice.hpp>
 #include <Gfx/GfxExecContext.hpp>
 
+#include <State/ValueConversion.hpp>
 namespace Gfx
 {
 
@@ -36,6 +37,12 @@ public:
     controls.push_back({new ossia::value, false});
     m_inlets.push_back(inletport);
     return controls.back();
+  }
+
+  ~gfx_exec_node()
+  {
+    for(auto ctl : controls)
+      delete ctl.first;
   }
 
   int32_t id{-1};

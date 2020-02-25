@@ -86,30 +86,96 @@ struct gfx_view_node
 
     struct value_visitor
     {
-      ValueVariant& value;
+      Types type{};
+      void* value{};
       void operator()() const noexcept {}
       void operator()(ossia::impulse) const noexcept {}
-      void operator()(int v) const noexcept { value = (float)v; }
-      void operator()(float v) const noexcept { value = v; }
-      void operator()(bool v) const noexcept { value = (float)v; }
-      void operator()(char v) const noexcept { value = (float)v; }
+      void operator()(int v) const noexcept {
+        switch(type)
+        {
+          case Types::Int:
+            memcpy(value, &v, 4);
+            break;
+          case Types::Float:
+          {
+            float fv = v;
+            memcpy(value, &fv, 4);
+            break;
+          }
+        }
+      }
+      void operator()(float v) const noexcept {
+        switch(type)
+        {
+          case Types::Int:
+          {
+            int iv = v;
+            memcpy(value, &iv, 4);
+            break;
+          }
+          case Types::Float:
+          {
+            memcpy(value, &v, 4);
+            break;
+          }
+        }
+      }
+      void operator()(bool v) const noexcept {
+        switch(type)
+        {
+          case Types::Int:
+          {
+            int iv = v;
+            memcpy(value, &iv, 4);
+            break;
+          }
+          case Types::Float:
+          {
+            float fv = v;
+            memcpy(value, &fv, 4);
+            break;
+          }
+        }
+      }
+      void operator()(char v) const noexcept {
+        switch(type)
+        {
+          case Types::Int:
+          {
+            int iv = v;
+            memcpy(value, &iv, 4);
+            break;
+          }
+          case Types::Float:
+          {
+            float fv = v;
+            memcpy(value, &fv, 4);
+            break;
+          }
+        }
+      }
       void operator()(const std::string& v) const noexcept {}
-      void operator()(ossia::vec2f v) const noexcept { value = v; }
-      void operator()(ossia::vec3f v) const noexcept { value = v; }
-      void operator()(ossia::vec4f v) const noexcept { value = v; }
+      void operator()(ossia::vec2f v) const noexcept { memcpy(value, v.data(), 8); }
+      void operator()(ossia::vec3f v) const noexcept { memcpy(value, v.data(), 12); }
+      void operator()(ossia::vec4f v) const noexcept { memcpy(value, v.data(), 16); }
       void operator()(const std::vector<ossia::value>& v) const noexcept
       {
-        std::visit(vec_visitor{v}, value);
+        // TODOstd::visit(vec_visitor{v}, value);
       }
     };
 
     assert(int(impl->input.size()) > port);
 
-    ValueVariant& val = impl->input[port]->value;
-    v.apply(value_visitor{val});
+    auto& in = impl->input[port];
+    v.apply(value_visitor{in->type, in->value});
+    impl->materialChanged++;
   }
 
-  void process(int32_t port, const ossia::audio_vector& v) {}
+  void process(int32_t port, const ossia::audio_vector& v)
+  {
+    // TODO create a texture
+    // TODO fft
+  }
 };
 
 class gfx_window_context : public QObject

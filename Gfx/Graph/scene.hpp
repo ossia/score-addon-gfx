@@ -40,7 +40,7 @@ struct FunVideoGraph : Graph
     nodes.push_back(screen);
   }
 };*/
-
+/*
 struct ExampleGraph : Graph
 {
   ExampleGraph()
@@ -130,3 +130,4 @@ struct MinimalGraph : Graph
     edges.push_back(edge);
   }
 };
+*/

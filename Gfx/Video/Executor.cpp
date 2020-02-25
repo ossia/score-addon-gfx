@@ -18,6 +18,7 @@ class video_node final : public gfx_exec_node
 public:
   video_node(const std::shared_ptr<video_decoder>& dec, GfxExecutionAction& ctx)
       : gfx_exec_node{ctx}
+      , m_decoder{dec}
   {
     switch (dec->pixel_format())
     {
@@ -38,11 +39,15 @@ public:
 
   ~video_node()
   {
+    m_decoder->seek(0);
     if (id >= 0)
       exec_context->ui->unregister_node(id);
   }
 
   std::string label() const noexcept override { return "Gfx::video_node"; }
+
+private:
+  std::shared_ptr<video_decoder> m_decoder;
 };
 
 ProcessExecutorComponent::ProcessExecutorComponent(

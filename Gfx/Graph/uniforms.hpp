@@ -11,6 +11,7 @@ struct image
 enum class Types
 {
   Empty,
+  Int,
   Float,
   Vec2,
   Vec3,

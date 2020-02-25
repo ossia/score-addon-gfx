@@ -142,7 +142,7 @@ private:
   {
     {
       std::lock_guard _{m_framesMutex};
-      if (m_frames.empty() || m_frames.front()->pkt_dts == dts)
+      if (!m_frames.empty() && m_frames.front()->pkt_dts == dts)
       {
         return false;
       }

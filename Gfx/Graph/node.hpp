@@ -18,7 +18,7 @@ struct Edge;
 struct Port
 {
   NodeModel* node{};
-  ValueVariant value;
+  void* value{};
   Types type{};
   std::vector<Edge*> edges;
 };
@@ -104,7 +104,11 @@ protected:
   QShader m_vertexS;
   QShader m_fragmentS;
 
+  std::unique_ptr<char[]> m_materialData;
+
+  friend class RenderedNode;
 public:
+  int64_t materialChanged{0};
   bool addedToGraph{};
 };
 
@@ -130,6 +134,7 @@ public:
 
   QRhiBuffer* m_materialUBO{};
   int m_materialSize{};
+  int64_t materialChangedIndex{-1};
 
   friend struct Graph;
   friend struct Renderer;

@@ -101,6 +101,7 @@ void RenderedNode::init(Renderer& renderer)
       {
         case Types::Empty:
           break;
+        case Types::Int:
         case Types::Float:
           m_materialSize += 4;
           break;
@@ -234,13 +235,14 @@ void RenderedNode::update(Renderer& renderer, QRhiResourceUpdateBatch& res)
   res.updateDynamicBuffer(
       m_processUBO, 0, sizeof(ProcessUBO), &this->node.standardUBO);
 
-  if (m_materialSize > 0)
+  if (m_materialSize > 0 && materialChangedIndex != node.materialChanged)
   {
     auto& input = node.input;
-    char* data = (char*)alloca(sizeof(char) * m_materialSize);
-    std::fill_n(data, m_materialSize, 0);
+    char* data = node.m_materialData.get();//(char*)alloca(sizeof(char) * m_materialSize);
+    //std::fill_n(data, m_materialSize, 0);
 
     char* cur = data;
+    /*
     for (auto in : input)
     {
       switch (in->type)
@@ -270,7 +272,7 @@ void RenderedNode::update(Renderer& renderer, QRhiResourceUpdateBatch& res)
           }
           else
           {
-            ossia::vec4f tex{0, 0, 1280, 720};
+            ossia::vec4f tex{0, 0, 320, 240};
             memcpy(cur, tex.data(), 16);
           }
           break;
@@ -278,8 +280,10 @@ void RenderedNode::update(Renderer& renderer, QRhiResourceUpdateBatch& res)
           break;
       }
     }
+    */
 
     res.updateDynamicBuffer(m_materialUBO, 0, m_materialSize, data);
+    materialChangedIndex = node.materialChanged;
   }
 
   customUpdate(renderer, res);

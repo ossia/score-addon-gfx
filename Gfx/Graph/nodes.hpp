@@ -46,7 +46,7 @@ struct ColorNode : NodeModel
   ColorNode() : NodeModel{filter}
   {
     input.push_back(new Port{this, {}, Types::Vec4, {}});
-    input.back()->value = ossia::vec4f{0.6, 0.3, 0.78, 1.};
+    //input.back()->value = ossia::vec4f{0.6, 0.3, 0.78, 1.};
     output.push_back(new Port{this, {}, Types::Image, {}});
   }
 
