@@ -46,8 +46,48 @@ public:
 
   std::string label() const noexcept override { return "Gfx::video_node"; }
 
+  video_decoder& decoder() const noexcept { return *m_decoder; }
 private:
   std::shared_ptr<video_decoder> m_decoder;
+};
+
+class video_process : public ossia::node_process
+{
+public:
+  using node_process::node_process;
+
+  void offset_impl(ossia::time_value tv) override
+  {
+    // TODO
+    // static_cast<video_node&>(*node).decoder().seek(0);
+  }
+  void transport_impl(ossia::time_value date) override
+  {
+    // TODO
+    // static_cast<video_node&>(*node).decoder().seek(0);
+  }
+
+  void state_impl(const ossia::token_request& req)
+  {
+    node->request(req);
+  }
+
+  void start() override
+  {
+    static_cast<video_node&>(*node).decoder().seek(0);
+  }
+  void stop() override
+  {
+    static_cast<video_node&>(*node).decoder().seek(0);
+  }
+  void pause() override
+  {
+
+  }
+  void resume() override
+  {
+
+  }
 };
 
 ProcessExecutorComponent::ProcessExecutorComponent(
@@ -63,6 +103,6 @@ ProcessExecutorComponent::ProcessExecutorComponent(
   n->root_outputs().push_back(new ossia::value_outlet);
 
   this->node = n;
-  m_ossia_process = std::make_shared<ossia::node_process>(n);
+  m_ossia_process = std::make_shared<video_process>(n);
 }
 }

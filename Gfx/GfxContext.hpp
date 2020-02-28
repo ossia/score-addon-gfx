@@ -220,12 +220,12 @@ public:
 
     m_graph = new Graph;
 
-    startTimer(16);
-    // moveToThread(&m_thread);
-    // m_thread.start();
-    //
-    // QMetaObject::invokeMethod(this, [this] { startTimer(16); },
-    // Qt::QueuedConnection);
+    //:startTimer(16);
+    moveToThread(&m_thread);
+    m_thread.start();
+
+    QMetaObject::invokeMethod(this, [this] { startTimer(16); },
+    Qt::QueuedConnection);
   }
 
   int32_t register_node(std::unique_ptr<NodeModel> node)
