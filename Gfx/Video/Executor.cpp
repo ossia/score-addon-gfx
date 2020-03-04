@@ -97,12 +97,15 @@ ProcessExecutorComponent::ProcessExecutorComponent(
     QObject* parent)
     : ProcessComponent_T{element, ctx, id, "gfxExecutorComponent", parent}
 {
-  auto n = std::make_shared<video_node>(
-      element.decoder(), ctx.doc.plugin<DocumentPlugin>().exec);
+  if(element.decoder())
+  {
+    auto n = std::make_shared<video_node>(
+          element.decoder(), ctx.doc.plugin<DocumentPlugin>().exec);
 
-  n->root_outputs().push_back(new ossia::value_outlet);
+    n->root_outputs().push_back(new ossia::value_outlet);
 
-  this->node = n;
-  m_ossia_process = std::make_shared<video_process>(n);
+    this->node = n;
+    m_ossia_process = std::make_shared<video_process>(n);
+  }
 }
 }

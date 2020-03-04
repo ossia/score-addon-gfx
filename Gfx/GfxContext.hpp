@@ -207,17 +207,6 @@ public:
 #endif
     m_api = Vulkan;
 
-    // OpenGL specifics.
-    QSurfaceFormat fmt;
-    fmt.setDepthBufferSize(24);
-    fmt.setStencilBufferSize(8);
-    fmt.setSamples(1);
-    fmt.setSwapInterval(1);
-    fmt.setColorSpace(QSurfaceFormat::DefaultColorSpace);
-    fmt.setAlphaBufferSize(8);
-
-    QSurfaceFormat::setDefaultFormat(fmt);
-
     m_graph = new Graph;
 
     //:startTimer(16);
@@ -226,6 +215,13 @@ public:
 
     QMetaObject::invokeMethod(this, [this] { startTimer(16); },
     Qt::QueuedConnection);
+  }
+
+  ~gfx_window_context()
+  {
+    if(m_thread.isRunning())
+      m_thread.exit(0);
+    m_thread.wait();
   }
 
   int32_t register_node(std::unique_ptr<NodeModel> node)

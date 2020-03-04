@@ -237,12 +237,14 @@ void RenderedNode::update(Renderer& renderer, QRhiResourceUpdateBatch& res)
 
   if (m_materialSize > 0 && materialChangedIndex != node.materialChanged)
   {
-    auto& input = node.input;
     char* data = node.m_materialData.get();//(char*)alloca(sizeof(char) * m_materialSize);
+    /*
+    auto& input = node.input;
     //std::fill_n(data, m_materialSize, 0);
 
+
     char* cur = data;
-    /*
+
     for (auto in : input)
     {
       switch (in->type)

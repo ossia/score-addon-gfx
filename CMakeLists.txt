@@ -1,9 +1,14 @@
 project(score_addon_gfx LANGUAGES C CXX)
 
+find_package(Qt5 5.14 OPTIONAL_COMPONENTS ShaderTools)
+if(NOT TARGET Qt5::ShaderTools)
+  return()
+endif()
+
 # General initialization
 score_common_setup()
 
-find_package(Qt5 5.14 COMPONENTS Widgets ShaderTools REQUIRED)
+
 find_package(Qt5Gui 5.14 REQUIRED Private)
 
 if(NOT TARGET avformat)
