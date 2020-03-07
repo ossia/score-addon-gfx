@@ -329,7 +329,9 @@ void DataStreamWriter::write(Gfx::Filter::Model& proc)
       proc.m_outlets,
       &proc);
 
-  m_stream >> proc.m_fragment;
+  QString s;
+  m_stream >> s;
+  proc.setFragment(s);
   checkDelimiter();
 }
 
@@ -349,5 +351,5 @@ void JSONObjectWriter::write(Gfx::Filter::Model& proc)
       proc.m_inlets,
       proc.m_outlets,
       &proc);
-  proc.m_fragment = obj["Fragment"].toString();
+  proc.setFragment(obj["Fragment"].toString());
 }

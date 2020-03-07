@@ -232,7 +232,6 @@ public:
 #else
     m_api = OpenGL;
 #endif
-    m_api = OpenGL;
 
     m_graph = new Graph;
 

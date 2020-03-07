@@ -123,6 +123,7 @@ void Renderer::update(QRhiResourceUpdateBatch& res)
 
     screenUBO.renderSize[0] = this->lastSize.width();
     screenUBO.renderSize[1] = this->lastSize.height();
+    qDebug() << screenUBO.renderSize;
 #if defined(_WIN32)
     res.updateDynamicBuffer(m_rendererUBO, 0, sizeof(ScreenUBO), &screenUBO);
 #else

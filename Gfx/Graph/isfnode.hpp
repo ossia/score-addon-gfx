@@ -127,8 +127,18 @@ struct ISFNode : NodeModel
   // Texture format: 1 row = 1 channel of N samples
   std::list<AudioTexture> audio_textures;
 
+  static const inline QString defaultVert =
+      R"_(#version 450
+layout(location = 0) in vec2 position;
+layout(location = 0) out vec2 isf_FragNormCoord;
+
+void main(void) {
+  gl_Position = vec4( position, 0.0, 1.0 );
+  isf_FragNormCoord = vec2((gl_Position.x+1.0)/2.0, (gl_Position.y+1.0)/2.0);
+}
+      )_";;
   ISFNode(const isf::descriptor& desc, QString frag)
-    : NodeModel{frag}
+    : NodeModel{defaultVert, frag}
   {
     int sz = 0;
     for(const isf::input& input : desc.inputs)
@@ -181,7 +191,7 @@ struct ISFNode : NodeModel
       {
         bool textureChanged = false;
         auto& [rhiSampler, rhiTexture] = audio.samplers[&renderer];
-        const auto curSz = rhiTexture ? rhiTexture->pixelSize() : QSize{};
+        const auto curSz = (rhiTexture) ? rhiTexture->pixelSize() : QSize{};
         int numSamples = curSz.width() * curSz.height();
         if(numSamples != audio.data.size())
         {
@@ -202,14 +212,14 @@ struct ISFNode : NodeModel
           }
           else
           {
-            rhiTexture = renderer.m_emptyTexture;
+            rhiTexture = nullptr;
             textureChanged = true;
           }
         }
 
         if(textureChanged)
         {
-          thread_local std::vector<QRhiShaderResourceBinding> tmp;
+          std::vector<QRhiShaderResourceBinding> tmp;
           tmp.assign(m_srb->cbeginBindings(), m_srb->cendBindings());
           for(QRhiShaderResourceBinding& b : tmp)
           {
@@ -217,7 +227,7 @@ struct ISFNode : NodeModel
             {
               if(b.data()->u.stex.sampler == rhiSampler)
               {
-                b.data()->u.stex.tex = rhiTexture;
+                b.data()->u.stex.tex = rhiTexture ? rhiTexture : renderer.m_emptyTexture;
               }
             }
           }
@@ -226,7 +236,7 @@ struct ISFNode : NodeModel
           m_srb->build();
         }
 
-        if(rhiTexture && rhiTexture != renderer.m_emptyTexture)
+        if(rhiTexture)
         {
           QRhiTextureSubresourceUploadDescription subdesc(audio.data.data(), audio.data.size() * 4);
           QRhiTextureUploadEntry entry{0, 0, subdesc};
@@ -241,7 +251,10 @@ struct ISFNode : NodeModel
       auto& n = (ISFNode&)(node);
       for(auto& texture : n.audio_textures)
         if(auto tex = texture.samplers[&renderer].second)
-          tex->releaseAndDestroyLater();
+        {
+          if(tex != renderer.m_emptyTexture)
+            tex->releaseAndDestroyLater();
+        }
     }
   };
 
