@@ -173,8 +173,35 @@ struct gfx_view_node
 
   void process(int32_t port, const ossia::audio_vector& v)
   {
-    // TODO create a texture
-    // TODO fft
+    if(v.empty() || v[0].empty())
+      return;
+
+    assert(int(impl->input.size()) > port);
+    auto& in = impl->input[port];
+    assert(in->type == Types::Audio);
+    AudioTexture& tex = *(AudioTexture*) in->value;
+
+    tex.channels = v.size();
+    tex.data.clear();
+    //if(tex.fixedSize)
+    {
+      // TODO
+
+    }
+    // else
+    {
+      tex.data.resize(v.size() * v[0].size());
+
+      float* sample = tex.data.data();
+      for(auto& chan : v)
+      {
+        for(float in : chan)
+        {
+          (*sample) = 0.5f + in / 2.f;
+          sample++;
+        }
+      }
+    }
   }
 };
 
@@ -205,13 +232,16 @@ public:
 #else
     m_api = OpenGL;
 #endif
-    m_api = Vulkan;
+    m_api = OpenGL;
 
     m_graph = new Graph;
 
-    //:startTimer(16);
-    moveToThread(&m_thread);
-    m_thread.start();
+    if(m_api == Vulkan)
+    {
+      //:startTimer(16);
+      moveToThread(&m_thread);
+      m_thread.start();
+    }
 
     QMetaObject::invokeMethod(this, [this] { startTimer(16); },
     Qt::QueuedConnection);

@@ -130,7 +130,7 @@ struct YUV420Node : NodeModel
       }
     }
 
-    void customRelease() override
+    void customRelease(Renderer&) override
     {
       for(auto [sampler, tex] : m_samplers)
         tex->releaseAndDestroyLater();
@@ -256,7 +256,7 @@ struct RGB0Node : NodeModel
       }
     }
 
-    void customRelease() override
+    void customRelease(Renderer&) override
     {
       for(auto [sampler, tex] : m_samplers)
         tex->releaseAndDestroyLater();

@@ -46,6 +46,7 @@ set(HDRS
     Gfx/Graph/nodes.hpp
     Gfx/Graph/node.hpp
     Gfx/Graph/filternode.hpp
+    Gfx/Graph/isfnode.hpp
     Gfx/Graph/graph.hpp
     Gfx/Graph/uniforms.hpp
     Gfx/Graph/mesh.hpp

@@ -1,4 +1,5 @@
 #include "filternode.hpp"
+#include "isfnode.hpp"
 #include "window.hpp"
 
 NodeModel::~NodeModel() {}
@@ -17,3 +18,5 @@ ProductNode::~ProductNode() {}
 NoiseNode::~NoiseNode() {}
 
 FilterNode::~FilterNode() {}
+
+ISFNode::~ISFNode() {}

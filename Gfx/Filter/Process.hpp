@@ -8,6 +8,7 @@
 
 #include <Gfx/CommandFactory.hpp>
 #include <Gfx/Filter/Metadata.hpp>
+#include <isf.hpp>
 
 namespace isf
 {
@@ -40,6 +41,9 @@ public:
   void setFragment(QString f);
   void fragmentChanged(const QString& f) W_SIGNAL(fragmentChanged, f);
 
+  const isf::descriptor& isfDescriptor() const noexcept
+  { return m_isfDescriptor; }
+
   PROPERTY(
       QString,
       fragment READ fragment WRITE setFragment NOTIFY fragmentChanged)
@@ -57,6 +61,7 @@ private:
 
   QString m_fragment;
   QString m_processedFragment;
+  isf::descriptor m_isfDescriptor;
 };
 
 using ProcessFactory = Process::ProcessFactory_T<Gfx::Filter::Model>;

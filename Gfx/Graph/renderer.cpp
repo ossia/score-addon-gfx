@@ -28,7 +28,7 @@ void Renderer::init(QRhi& rhi)
 void Renderer::release()
 {
   for (int i = 0; i < renderedNodes.size(); i++)
-    renderedNodes[i]->release();
+    renderedNodes[i]->release(*this);
 
   delete m_vertexBuffer;
   m_vertexBuffer = nullptr;

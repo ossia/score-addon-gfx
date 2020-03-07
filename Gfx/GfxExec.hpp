@@ -28,21 +28,32 @@ int64_t index_of(
 class gfx_exec_node : public ossia::nonowning_graph_node
 {
 public:
-  std::vector<std::pair<ossia::value*, bool>> controls;
+  struct control {
+    ossia::value* value{};
+    ossia::value_port* port{};
+    bool changed{};
+  };
+  std::vector<control> controls;
   GfxExecutionAction* exec_context{};
   gfx_exec_node(GfxExecutionAction& e_ctx) : exec_context{&e_ctx} {}
-  std::pair<ossia::value*, bool>& add_control()
+  control& add_control()
   {
     auto inletport = new ossia::value_inlet;
-    controls.push_back({new ossia::value, false});
+    controls.push_back(control{new ossia::value, &**inletport, false});
     m_inlets.push_back(inletport);
     return controls.back();
+  }
+
+  void add_audio()
+  {
+    auto inletport = new ossia::audio_inlet;
+    m_inlets.push_back(inletport);
   }
 
   ~gfx_exec_node()
   {
     for(auto ctl : controls)
-      delete ctl.first;
+      delete ctl.value;
   }
 
   int32_t id{-1};
@@ -56,11 +67,11 @@ public:
       for (int i = 0; i < n; i++)
       {
         auto& ctl = controls[i];
-        if (ctl.second)
+        if (ctl.changed)
         {
-          m_inlets[i]->target<ossia::value_port>()->write_value(
-              std::move(*ctl.first), 0);
-          ctl.second = false;
+          ctl.port->write_value(
+              std::move(*ctl.value), 0);
+          ctl.changed = false;
         }
       }
     }
@@ -127,13 +138,13 @@ public:
 
 struct control_updater
 {
-  std::pair<ossia::value*, bool>& control;
+  gfx_exec_node::control& ctrl;
   ossia::value v;
 
   void operator()() noexcept
   {
-    *control.first = std::move(v);
-    control.second = true;
+    *ctrl.value = std::move(v);
+    ctrl.changed = true;
   }
 };
 

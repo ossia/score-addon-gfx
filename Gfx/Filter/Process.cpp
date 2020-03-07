@@ -10,7 +10,6 @@
 #include <Gfx/Graph/nodes.hpp>
 #include <Gfx/TexturePort.hpp>
 #include <wobjectimpl.h>
-#include <isf.hpp>
 W_OBJECT_IMPL(Gfx::Filter::Model)
 namespace Gfx::Filter
 {
@@ -87,7 +86,8 @@ void Model::setFragment(QString f)
     if(isfprocessed != f)
     {
       m_processedFragment = isfprocessed;
-      setupIsf(p.data());
+      m_isfDescriptor = p.data();
+      setupIsf(m_isfDescriptor);
 
       inletsChanged();
       outletsChanged();
@@ -97,6 +97,7 @@ void Model::setFragment(QString f)
   } catch(...) {
   }
 
+  m_isfDescriptor = {};
   m_processedFragment = m_fragment;
   setupNormalShader();
 

@@ -22,6 +22,7 @@
 #include <QOffscreenSurface>
 #include <QWindow>
 
+class Renderer;
 enum GraphicsApi
 {
   Null,
@@ -39,6 +40,7 @@ struct RenderState
   QRhiRenderPassDescriptor* renderPassDescriptor{};
   QRhiRenderBuffer* renderBuffer{};
   Window* window{};
+  Renderer* renderer{};
 
   QOffscreenSurface* surface{};
   bool hasSwapChain = false;

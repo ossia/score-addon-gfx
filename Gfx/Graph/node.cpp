@@ -134,6 +134,8 @@ void RenderedNode::init(Renderer& renderer)
           m_samplers.push_back({sampler, texture});
           break;
         }
+        case Types::Audio:
+          break;
       }
     }
 
@@ -237,53 +239,7 @@ void RenderedNode::update(Renderer& renderer, QRhiResourceUpdateBatch& res)
 
   if (m_materialSize > 0 && materialChangedIndex != node.materialChanged)
   {
-    char* data = node.m_materialData.get();//(char*)alloca(sizeof(char) * m_materialSize);
-    /*
-    auto& input = node.input;
-    //std::fill_n(data, m_materialSize, 0);
-
-
-    char* cur = data;
-
-    for (auto in : input)
-    {
-      switch (in->type)
-      {
-        case Types::Empty:
-          break;
-        case Types::Float:
-          if (auto v = std::get_if<float>(&in->value))
-            memcpy(cur, v, 4);
-          cur += 4;
-          break;
-        case Types::Vec2:
-          if (auto v = std::get_if<ossia::vec2f>(&in->value))
-            memcpy(cur, v->data(), 8);
-          cur += 8;
-          break;
-        case Types::Vec3:
-          if (auto v = std::get_if<ossia::vec3f>(&in->value))
-            memcpy(cur, v->data(), 12);
-          cur += 12;
-          break;
-        case Types::Vec4:
-          if (auto v = std::get_if<ossia::vec4f>(&in->value))
-          {
-            memcpy(cur, v->data(), 16);
-            cur += 16;
-          }
-          else
-          {
-            ossia::vec4f tex{0, 0, 320, 240};
-            memcpy(cur, tex.data(), 16);
-          }
-          break;
-        case Types::Image:
-          break;
-      }
-    }
-    */
-
+    char* data = node.m_materialData.get();
     res.updateDynamicBuffer(m_materialUBO, 0, m_materialSize, data);
     materialChangedIndex = node.materialChanged;
   }
@@ -291,12 +247,11 @@ void RenderedNode::update(Renderer& renderer, QRhiResourceUpdateBatch& res)
   customUpdate(renderer, res);
 }
 
-void RenderedNode::customRelease() {}
+void RenderedNode::customRelease(Renderer&) {}
 
-void RenderedNode::releaseWithoutRenderTarget()
+void RenderedNode::releaseWithoutRenderTarget(Renderer& r)
 {
-
-  customRelease();
+  customRelease(r);
 
   for (auto sampler : m_samplers)
   {
@@ -318,9 +273,9 @@ void RenderedNode::releaseWithoutRenderTarget()
   delete m_srb;
   m_srb = nullptr;
 }
-void RenderedNode::release()
+void RenderedNode::release(Renderer& r)
 {
-  releaseWithoutRenderTarget();
+  releaseWithoutRenderTarget(r);
 
   if (m_texture)
   {

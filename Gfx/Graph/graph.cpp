@@ -74,9 +74,9 @@ void Graph::setupOutputs(GraphicsApi graphicsApi)
 
   for (auto& renderer : renderers)
   {
-    renderer.release();
+    renderer->release();
 
-    for (auto rn : renderer.renderedNodes)
+    for (auto rn : renderer->renderedNodes)
       delete rn;
   }
 
@@ -103,20 +103,32 @@ void Graph::setupOutputs(GraphicsApi graphicsApi)
         output->window->state
             = RenderState::create(*output->window, graphicsApi);
 
-        createRenderer(output, output->window->state);
+        renderers.push_back(createRenderer(output, output->window->state));
+      };
+      output->window->onResize = [=] {
+        for(auto it = this->renderers.begin(); it != this->renderers.end(); ++it)
+        {
+          auto& renderer = **it;
+          if(renderer.state.window == output->window.get())
+          {
+            renderer.release();
+          }
+          (*it).reset();
+          *it = createRenderer(output, output->window->state);
+        }
       };
       output->window->resize(1280, 720);
       output->window->show();
     }
     else
     {
-      createRenderer(output, output->window->state);
+      renderers.push_back(createRenderer(output, output->window->state));
       // output->window->state.hasSwapChain = true;
     }
 
     output->window->onRender = [=] {
-      SCORE_ASSERT(i < renderers.size());
-      renderers[i].render();
+      if(auto r = output->window->state.renderer)
+        r->render();
     };
 
     i++;
@@ -125,8 +137,9 @@ void Graph::setupOutputs(GraphicsApi graphicsApi)
 
 void Graph::relinkGraph()
 {
-  for (auto& r : renderers)
+  for (auto& rptr : renderers)
   {
+    auto& r = *rptr;
     for (auto& node : nodes)
       node->addedToGraph = false;
 
@@ -166,7 +179,7 @@ void Graph::relinkGraph()
           }
           else
           {
-            rn->releaseWithoutRenderTarget();
+            rn->releaseWithoutRenderTarget(r);
             rn->init(r);
           }
           SCORE_ASSERT(rn);
@@ -177,18 +190,20 @@ void Graph::relinkGraph()
       {
         auto rn = model_nodes[0]->renderedNodes[&r];
         assert(rn);
-        rn->release();
+        rn->release(r);
       }
     }
     r.state.window->canRender = r.renderedNodes.size() > 1;
   }
 }
 
-void Graph::createRenderer(OutputNode* output, RenderState state)
+std::shared_ptr<Renderer> Graph::createRenderer(OutputNode* output, RenderState state)
 {
+  auto ptr = std::make_shared<Renderer>();
   for (auto& node : nodes)
     node->addedToGraph = false;
-  Renderer r;
+  Renderer& r = *ptr;
+  output->window->state.renderer = ptr.get();
   r.state = std::move(state);
 
   auto& model_nodes = r.nodes;
@@ -225,10 +240,7 @@ void Graph::createRenderer(OutputNode* output, RenderState state)
   r.renderedNodes.back()->setScreenRenderTarget(r.state);
 
   output->window->canRender = r.renderedNodes.size() > 1;
-  renderers.push_back(std::move(r));
-
   {
-    auto& r = renderers.back();
     // Register the rendered nodes with their parents
     for (auto rn : r.renderedNodes)
     {
@@ -243,13 +255,15 @@ void Graph::createRenderer(OutputNode* output, RenderState state)
         rn->init(r);
     }
   }
+
+  return ptr;
 }
 
 Graph::~Graph()
 {
   for (auto& renderer : renderers)
   {
-    renderer.release();
+    renderer->release();
   }
 
   for (auto out : outputs)

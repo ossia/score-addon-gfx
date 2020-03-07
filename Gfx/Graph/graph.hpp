@@ -22,7 +22,7 @@ struct Graph
 
   void maybeRebuild(Renderer& r);
 
-  void createRenderer(OutputNode*, RenderState state);
+  std::shared_ptr<Renderer> createRenderer(OutputNode*, RenderState state);
 
   void setupOutputs(GraphicsApi graphicsApi);
 
@@ -32,7 +32,7 @@ struct Graph
 
 private:
   std::vector<OutputNode*> outputs;
-  std::vector<Renderer> renderers;
+  std::vector<std::shared_ptr<Renderer>> renderers;
 
   std::vector<std::shared_ptr<Window>> unused_windows;
 

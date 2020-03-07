@@ -45,12 +45,15 @@ public:
 
   std::function<void()> onWindowReady;
   std::function<void()> onRender;
+  std::function<void()> onResize;
   bool canRender{};
   void init() { onWindowReady(); }
 
   void resizeSwapChain()
   {
     state.hasSwapChain = state.swapChain->buildOrResize(); // also handles m_ds
+    if(onResize)
+      onResize();
   }
 
   void releaseSwapChain()

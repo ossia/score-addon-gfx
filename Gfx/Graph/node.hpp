@@ -9,11 +9,20 @@
 #include <algorithm>
 #include <vector>
 #include <optional>
-
+#include <unordered_map>
 
 class NodeModel;
 struct Port;
 struct Edge;
+class Renderer;
+struct AudioTexture
+{
+  std::unordered_map<Renderer*, std::pair<QRhiSampler*, QRhiTexture*>> samplers;
+
+  std::vector<float> data;
+  int channels{};
+  int fixedSize{0};
+};
 
 struct Port
 {
@@ -150,9 +159,9 @@ public:
   virtual void customUpdate(Renderer& renderer, QRhiResourceUpdateBatch& res);
   void update(Renderer& renderer, QRhiResourceUpdateBatch& res);
 
-  virtual void customRelease();
-  void release();
-  void releaseWithoutRenderTarget();
+  virtual void customRelease(Renderer&);
+  void release(Renderer&);
+  void releaseWithoutRenderTarget(Renderer&);
 
   QRhiGraphicsPipeline* pipeline() { return m_ps; }
   QRhiShaderResourceBindings* resources() { return m_srb; }
