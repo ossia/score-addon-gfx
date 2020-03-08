@@ -133,6 +133,11 @@ public:
       render();
   }
 
+  void mouseDoubleClickEvent(QMouseEvent* ev) override
+  {
+    setWindowState(Qt::WindowState(windowState() ^ Qt::WindowFullScreen));
+  }
+
   bool event(QEvent* e) override
   {
     switch (e->type())
