@@ -81,7 +81,7 @@ struct RenderState
     if (graphicsApi == D3D11)
     {
       QRhiD3D11InitParams params;
-      params.enableDebugLayer = true;
+      params.enableDebugLayer = false;
       // if (framesUntilTdr > 0)
       // {
       //   params.framesUntilKillingDeviceViaTdr = framesUntilTdr;

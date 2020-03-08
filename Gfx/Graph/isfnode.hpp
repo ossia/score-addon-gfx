@@ -206,7 +206,7 @@ void main(void) {
           {
             int samples = audio.data.size() / audio.channels;
             rhiTexture = rhi.newTexture(
-                  QRhiTexture::R32F, {samples, audio.channels}, 1, QRhiTexture::Flag{});
+                  QRhiTexture::D32F, {samples, audio.channels}, 1, QRhiTexture::Flag{});
             rhiTexture->build();
             textureChanged = true;
           }
