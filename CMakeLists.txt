@@ -109,6 +109,38 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 target_link_libraries(${PROJECT_NAME} PRIVATE
   avcodec avformat swresample avutil isf)
 
+if(APPLE)
+    find_library(QuartzCore_FK QuartzCore)
+    find_library(AppKit_FK AppKit)
+    find_library(OpenGL_FK OpenGL)
+    find_library(Foundation_FK Foundation)
+    find_library(AVFoundation_FK AVFoundation)
+    find_library(CoreVideo_FK CoreVideo)
+    find_library(CoreMedia_FK CoreMedia)
+    find_library(VideoDecodeAcceleration_FK VideoDecodeAcceleration)
+    find_library(CoreFoundation_FK CoreFoundation)
+    find_library(AudioToolbox_FK AudioToolbox)
+    find_library(VideoToolbox_FK VideoToolbox)
+    find_package(BZip2 REQUIRED)
+    find_package(ZLIB REQUIRED)
+
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        ${QuartzCore_FK}
+        ${AppKit_FK}
+        ${OpenGL_FK}
+        ${Foundation_FK}
+        ${AVFoundation_FK}
+        ${CoreVideo_FK}
+        ${CoreMedia_FK}
+        ${VideoDecodeAcceleration_FK}
+        ${CoreFoundation_FK}
+        ${AudioToolbox_FK}
+        ${VideoToolbox_FK}
+        BZip2::BZip2
+        ZLIB::ZLIB
+        )
+endif()
+
 # Target-specific options
 setup_score_plugin(${PROJECT_NAME})
 
