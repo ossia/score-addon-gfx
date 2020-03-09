@@ -56,6 +56,16 @@ struct YUV420Node : NodeModel
   {
     using RenderedNode::RenderedNode;
     QElapsedTimer t;
+    std::vector<AVFrame*> framesToFree;
+
+    ~Rendered()
+    {
+      auto& decoder = *static_cast<const YUV420Node&>(node).decoder;
+      while (auto frame = decoder.dequeue_frame())
+      {
+        av_frame_free(&frame);
+      }
+    }
 
     void customInit(Renderer& renderer) override
     {
@@ -115,6 +125,10 @@ struct YUV420Node : NodeModel
     void
     customUpdate(Renderer& renderer, QRhiResourceUpdateBatch& res) override
     {
+      for(auto frame : framesToFree)
+        av_frame_free(&frame);
+      framesToFree.clear();
+
       auto& decoder = *static_cast<const YUV420Node&>(node).decoder;
       if(!t.isValid() || t.elapsed() > (1000. / decoder.fps()))
       {
@@ -124,7 +138,7 @@ struct YUV420Node : NodeModel
           setUPixels(renderer, res, frame->data[1], frame->linesize[1]);
           setVPixels(renderer, res, frame->data[2], frame->linesize[2]);
 
-          av_frame_free(&frame);
+          framesToFree.push_back(frame);
         }
         t.restart();
       }
@@ -146,7 +160,8 @@ struct YUV420Node : NodeModel
       // TODO glPixelStorei(GL_UNPACK_ROW_LENGTH, stride);
       const auto w = decoder.width(), h = decoder.height();
       auto y_tex = m_samplers[0].texture;
-      QRhiTextureSubresourceUploadDescription subdesc{pixels, w * h};
+      QRhiTextureSubresourceUploadDescription subdesc;
+      subdesc.setData(QByteArray::fromRawData(reinterpret_cast<const char*>(pixels), w * h));
       QRhiTextureUploadEntry entry{0, 0, subdesc};
       QRhiTextureUploadDescription desc{entry};
       res.uploadTexture(y_tex, desc);
@@ -161,7 +176,8 @@ struct YUV420Node : NodeModel
       auto& decoder = *static_cast<const YUV420Node&>(node).decoder;
       const auto w = decoder.width(), h = decoder.height();
       auto u_tex = m_samplers[1].texture;
-      QRhiTextureSubresourceUploadDescription subdesc{pixels, w * h / 4};
+      QRhiTextureSubresourceUploadDescription subdesc;
+      subdesc.setData(QByteArray::fromRawData(reinterpret_cast<const char*>(pixels), w * h / 4));
       QRhiTextureUploadEntry entry{0, 0, subdesc};
       QRhiTextureUploadDescription desc{entry};
 
@@ -177,7 +193,8 @@ struct YUV420Node : NodeModel
       auto& decoder = *static_cast<const YUV420Node&>(node).decoder;
       const auto w = decoder.width(), h = decoder.height();
       auto v_tex = m_samplers[2].texture;
-      QRhiTextureSubresourceUploadDescription subdesc{pixels, w * h / 4};
+      QRhiTextureSubresourceUploadDescription subdesc;
+      subdesc.setData(QByteArray::fromRawData(reinterpret_cast<const char*>(pixels), w * h / 4));
       QRhiTextureUploadEntry entry{0, 0, subdesc};
       QRhiTextureUploadDescription desc{entry};
       res.uploadTexture(v_tex, desc);
@@ -217,6 +234,16 @@ struct RGB0Node : NodeModel
   {
     using RenderedNode::RenderedNode;
     QElapsedTimer t;
+    std::vector<AVFrame*> framesToFree;
+
+    ~Rendered()
+    {
+      auto& decoder = *static_cast<const RGB0Node&>(node).decoder;
+      while (auto frame = decoder.dequeue_frame())
+      {
+        av_frame_free(&frame);
+      }
+    }
 
     void customInit(Renderer& renderer) override
     {
@@ -243,6 +270,10 @@ struct RGB0Node : NodeModel
     void
     customUpdate(Renderer& renderer, QRhiResourceUpdateBatch& res) override
     {
+      for(auto frame : framesToFree)
+        av_frame_free(&frame);
+      framesToFree.clear();
+
       auto& decoder = *static_cast<const RGB0Node&>(node).decoder;
       if(!t.isValid() || t.elapsed() > (1000. / decoder.fps()))
       {
@@ -250,7 +281,7 @@ struct RGB0Node : NodeModel
         {
           setPixels(renderer, res, frame->data[0], frame->linesize[0]);
 
-          av_frame_free(&frame);
+          framesToFree.push_back(frame);
         }
         t.restart();
       }
@@ -271,7 +302,8 @@ struct RGB0Node : NodeModel
       auto& decoder = *static_cast<const RGB0Node&>(node).decoder;
       const auto w = decoder.width(), h = decoder.height();
       auto y_tex = m_samplers[0].texture;
-      QRhiTextureSubresourceUploadDescription subdesc{pixels, w * h * 4};
+      QRhiTextureSubresourceUploadDescription subdesc;
+      subdesc.setData(QByteArray::fromRawData(reinterpret_cast<const char*>(pixels), w * h * 4));
       QRhiTextureUploadEntry entry{0, 0, subdesc};
       QRhiTextureUploadDescription desc{entry};
       res.uploadTexture(y_tex, desc);

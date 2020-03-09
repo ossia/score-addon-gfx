@@ -98,7 +98,9 @@ private:
       else
       {
         std::unique_lock lck{m_condMut};
-        m_condVar.wait(lck, [&] { return m_frames.size_approx() < frames_to_buffer; });
+        m_condVar.wait(lck, [&] { return m_frames.size_approx() < frames_to_buffer || !m_running.load(std::memory_order_acquire); });
+        if(!m_running.load(std::memory_order_acquire))
+          return;
         // bool mustRead{};
         // {
         //   //std::lock_guard _{m_framesMutex};
@@ -120,6 +122,7 @@ private:
   void close_file() noexcept
   {
     m_running.store(false, std::memory_order_release);
+    m_condVar.notify_one();
 
     if (m_thread.joinable())
       m_thread.join();

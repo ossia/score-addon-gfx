@@ -22,9 +22,6 @@ Model::Model(
 {
   metadata().setInstanceName(*this);
   m_outlets.push_back(new TextureOutlet{Id<Process::Port>(0), this});
-
-  // decoder.load("/home/kdab/test.h264", 60.);
-  // setPath("/home/jcelerier/VDMX_Halloween_Hap_4K/inlight_rotate_full_hap.mov");
 }
 
 Model::~Model() {}

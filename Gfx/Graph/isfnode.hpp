@@ -137,7 +137,7 @@ void main(void) {
   gl_Position = vec4( position, 0.0, 1.0 );
   isf_FragNormCoord = vec2((gl_Position.x+1.0)/2.0, (gl_Position.y+1.0)/2.0);
 }
-      )_";;
+      )_";
   ISFNode(const isf::descriptor& desc, QString frag)
     : NodeModel{defaultVert, frag}
   {
