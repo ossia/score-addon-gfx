@@ -21,7 +21,7 @@ extern "C"
 class video_decoder
 {
 public:
-  video_decoder() noexcept = default;
+  video_decoder() = default;
 
   ~video_decoder() noexcept { close_file(); }
 
