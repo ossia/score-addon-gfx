@@ -36,12 +36,20 @@ public:
   std::vector<control> controls;
   GfxExecutionAction* exec_context{};
   gfx_exec_node(GfxExecutionAction& e_ctx) : exec_context{&e_ctx} {}
+
+
   control& add_control()
   {
     auto inletport = new ossia::value_inlet;
     controls.push_back(control{new ossia::value, &**inletport, false});
     m_inlets.push_back(inletport);
     return controls.back();
+  }
+
+  void add_texture()
+  {
+    auto inletport = new ossia::value_inlet;
+    m_inlets.push_back(inletport);
   }
 
   void add_audio()

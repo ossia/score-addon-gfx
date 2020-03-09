@@ -8,7 +8,7 @@ NodeModel::NodeModel() {}
 
 NodeModel::NodeModel(QString frag)
 {
-  setShaders(Mesh::vertexShader, frag);
+  setShaders(TexturedMesh::vertexShader, frag);
 }
 
 NodeModel::NodeModel(QString vert, QString frag)
@@ -79,8 +79,10 @@ void NodeModel::setShaders(QString vert, QString frag)
     qDebug() << frag.toStdString().data();
   }
 
-  Q_ASSERT(m_vertexS.isValid());
-  Q_ASSERT(m_fragmentS.isValid());
+  if(!m_vertexS.isValid())
+    throw std::runtime_error("invalid vertex shader");
+  if(!m_fragmentS.isValid())
+    throw std::runtime_error("invalid fragment shader");
 }
 
 void RenderedNode::init(Renderer& renderer)
@@ -167,9 +169,9 @@ void RenderedNode::init(Renderer& renderer)
 
     QRhiVertexInputLayout inputLayout;
     inputLayout.setBindings(
-        {Mesh::m_vertexInputBindings[0], Mesh::m_vertexInputBindings[1]});
-    inputLayout.setAttributes({Mesh::m_vertexAttributeBindings[0],
-                               Mesh::m_vertexAttributeBindings[1]});
+        {TexturedMesh::m_vertexInputBindings[0], TexturedMesh::m_vertexInputBindings[1]});
+    inputLayout.setAttributes({TexturedMesh::m_vertexAttributeBindings[0],
+                               TexturedMesh::m_vertexAttributeBindings[1]});
     m_ps->setVertexInputLayout(inputLayout);
 
     // Shader resource bindings

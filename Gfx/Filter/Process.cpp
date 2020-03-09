@@ -280,12 +280,12 @@ QSet<QString> DropHandler::mimeTypes() const noexcept
 
 QSet<QString> LibraryHandler::acceptedFiles() const noexcept
 {
-  return {"frag", "glsl"};
+  return {"frag", "glsl", "fs"};
 }
 
 QSet<QString> DropHandler::fileExtensions() const noexcept
 {
-  return {"frag", "glsl"};
+  return {"frag", "glsl", "fs"};
 }
 
 std::vector<Process::ProcessDropHandler::ProcessDrop> DropHandler::dropData(

@@ -130,6 +130,7 @@ struct ISFNode : NodeModel
   static const inline QString defaultVert =
       R"_(#version 450
 layout(location = 0) in vec2 position;
+layout(location = 1) in vec2 texcoord;
 layout(location = 0) out vec2 isf_FragNormCoord;
 
 void main(void) {
@@ -141,8 +142,13 @@ void main(void) {
     : NodeModel{defaultVert, frag}
   {
     int sz = 0;
+
+    int i = 0;
     for(const isf::input& input : desc.inputs)
+    {
       sz += std::visit(input_size_vis{}, input.data);
+      i++;
+    }
 
     m_materialData.reset(new char[sz]);
     std::fill_n(m_materialData.get(), sz, 0);

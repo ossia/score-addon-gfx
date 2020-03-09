@@ -276,13 +276,13 @@ struct RGB0Node : NodeModel
       QRhiTextureUploadDescription desc{entry};
       res.uploadTexture(y_tex, desc);
     }
-
+/*
     std::optional<QSize> renderTargetSize() const noexcept override
     {
       auto& decoder = *static_cast<const RGB0Node&>(node).decoder;
       const auto w = decoder.width(), h = decoder.height();
       return QSize{w, h};
-    }
+    }*/
   };
 
   RGB0Node(std::shared_ptr<video_decoder> dec)

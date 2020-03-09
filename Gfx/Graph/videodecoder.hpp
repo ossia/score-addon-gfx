@@ -16,6 +16,7 @@ extern "C"
 #include <list>
 
 #include <condition_variable>
+#include <readerwriterqueue.h>
 
 class video_decoder
 {
@@ -65,34 +66,27 @@ public:
   AVFrame* dequeue_frame() noexcept
   {
     AVFrame* f{};
-    m_framesMutex.lock();
-    if (auto to_discard = m_discardUntil)
+    //m_framesMutex.lock();
+    if (auto to_discard = m_discardUntil.exchange(nullptr))
     {
-      while (!m_frames.empty() && m_frames.front() != to_discard)
+      while (m_frames.try_dequeue(f) && f != to_discard)
       {
-        f = m_frames.front();
         av_frame_free(&f);
-        m_frames.pop_front();
       }
 
-      if (!m_frames.empty())
-        m_frames.pop_front();
-
-      m_discardUntil = nullptr;
-      m_framesMutex.unlock();
+      //m_framesMutex.unlock();
       return to_discard;
     }
 
-    if (!m_frames.empty())
-    {
-      f = m_frames.front();
-      m_frames.pop_front();
-    }
-    m_framesMutex.unlock();
+    m_frames.try_dequeue(f);
+    m_condVar.notify_one();
+    //m_framesMutex.unlock();
     return f;
   }
 
 private:
+  std::mutex m_condMut;
+  std::condition_variable m_condVar;
   void buffer_thread() noexcept
   {
     while (m_running.load(std::memory_order_acquire))
@@ -103,19 +97,20 @@ private:
       }
       else
       {
-        bool mustRead{};
-        {
-          std::lock_guard _{m_framesMutex};
-          mustRead = m_frames.size() < frames_to_buffer;
-        }
+        std::unique_lock lck{m_condMut};
+        m_condVar.wait(lck, [&] { return m_frames.size_approx() < frames_to_buffer; });
+        // bool mustRead{};
+        // {
+        //   //std::lock_guard _{m_framesMutex};
+        //   mustRead = m_frames.size_approx() < frames_to_buffer;
+        // }
 
-        if (mustRead)
+        // if (mustRead)
         {
           if (auto f = read_frame_impl())
           {
             m_last_dts = f->pkt_dts;
-            std::lock_guard _{m_framesMutex};
-            m_frames.push_back(f);
+            m_frames.enqueue(f);
           }
         }
       }
@@ -141,11 +136,11 @@ private:
   bool seek_impl(int64_t dts) noexcept
   {
     {
-      std::lock_guard _{m_framesMutex};
-      if (!m_frames.empty() && m_frames.front()->pkt_dts == dts)
-      {
-        return false;
-      }
+      // std::lock_guard _{m_framesMutex};
+      // if (!m_frames.empty() && m_frames.front()->pkt_dts == dts)
+      // {
+      //   return false;
+      // }
     }
 
     int flags = AVSEEK_FLAG_FRAME;
@@ -180,9 +175,9 @@ private:
 
     m_last_dts = f->pkt_dts;
     {
-      std::lock_guard _{m_framesMutex};
+      //std::lock_guard _{m_framesMutex};
+      m_frames.enqueue(f);
       m_discardUntil = f;
-      m_frames.push_back(f);
     }
     return true;
   }
@@ -301,8 +296,8 @@ private:
 
   std::thread m_thread;
 
-  std::list<AVFrame*> m_frames;
-  std::mutex m_framesMutex;
+  moodycamel::ReaderWriterQueue<AVFrame*> m_frames;
+  //std::mutex m_framesMutex;
 
   AVFormatContext* m_formatContext{};
   AVCodecContext* m_codecContext{};
@@ -315,7 +310,7 @@ private:
   int m_height{};
   double m_rate{};
 
-  AVFrame* m_discardUntil{};
+  std::atomic<AVFrame*> m_discardUntil{};
   std::atomic_int64_t m_seekTo = -1;
   int64_t m_last_dts = 0;
 

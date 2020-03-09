@@ -1,12 +1,29 @@
 #pragma once
 #include <private/qrhi_p.h>
 
-struct Mesh
+struct PlainMesh
 {
-  static const inline QRhiVertexInputBinding m_vertexInputBindings[2]{
+  static const inline QRhiVertexInputBinding m_vertexInputBindings[]{
+      {2 * sizeof(float)}};
+  static const inline QRhiVertexInputAttribute m_vertexAttributeBindings[]{
+      {0, 0, QRhiVertexInputAttribute::Float2, 0}};
+
+  static const constexpr float vertexArray[] = {
+      -1,
+      -1,
+      3,
+      -1,
+      -1,
+      3
+  };
+};
+
+struct TexturedMesh
+{
+  static const inline QRhiVertexInputBinding m_vertexInputBindings[]{
       {2 * sizeof(float)},
       {2 * sizeof(float)}};
-  static const inline QRhiVertexInputAttribute m_vertexAttributeBindings[2]{
+  static const inline QRhiVertexInputAttribute m_vertexAttributeBindings[]{
       {0, 0, QRhiVertexInputAttribute::Float2, 0},
       {1, 1, QRhiVertexInputAttribute::Float2, 0}};
 

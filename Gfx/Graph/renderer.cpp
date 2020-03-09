@@ -8,7 +8,7 @@ void Renderer::init(QRhi& rhi)
   m_vertexBuffer = rhi.newBuffer(
       QRhiBuffer::Immutable,
       QRhiBuffer::VertexBuffer,
-      sizeof(Mesh::vertexArray));
+      sizeof(TexturedMesh::vertexArray));
   m_vertexBuffer->build();
 
   m_rendererUBO = rhi.newBuffer(
@@ -105,7 +105,7 @@ void Renderer::update(QRhiResourceUpdateBatch& res)
     ready = true;
 
     res.uploadStaticBuffer(
-        m_vertexBuffer, 0, m_vertexBuffer->size(), Mesh::vertexArray);
+        m_vertexBuffer, 0, m_vertexBuffer->size(), TexturedMesh::vertexArray);
 
     const auto proj = state.rhi->clipSpaceCorrMatrix();
 
@@ -123,7 +123,7 @@ void Renderer::update(QRhiResourceUpdateBatch& res)
 
     screenUBO.renderSize[0] = this->lastSize.width();
     screenUBO.renderSize[1] = this->lastSize.height();
-    qDebug() << screenUBO.renderSize;
+
 #if defined(_WIN32)
     res.updateDynamicBuffer(m_rendererUBO, 0, sizeof(ScreenUBO), &screenUBO);
 #else

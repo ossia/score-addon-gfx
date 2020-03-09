@@ -59,12 +59,12 @@ public:
   void offset_impl(ossia::time_value tv) override
   {
     // TODO
-    // static_cast<video_node&>(*node).decoder().seek(0);
+    static_cast<video_node&>(*node).decoder().seek(0);
   }
   void transport_impl(ossia::time_value date) override
   {
     // TODO
-    // static_cast<video_node&>(*node).decoder().seek(0);
+    static_cast<video_node&>(*node).decoder().seek(0);
   }
 
   void state_impl(const ossia::token_request& req)

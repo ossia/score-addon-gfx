@@ -26,6 +26,7 @@ void Graph::setupOutputs(GraphicsApi graphicsApi)
 #if QT_CONFIG(vulkan)
   if (graphicsApi == Vulkan && !vulkanInstanceCreated)
   {
+#if !defined(NDEBUG)
 #ifndef Q_OS_ANDROID
     vulkanInstance.setLayers(
         QByteArrayList() << "VK_LAYER_LUNARG_standard_validation");
@@ -38,6 +39,7 @@ void Graph::setupOutputs(GraphicsApi graphicsApi)
                          << "VK_LAYER_LUNARG_image"
                          << "VK_LAYER_LUNARG_swapchain"
                          << "VK_LAYER_GOOGLE_unique_objects");
+#endif
 #endif
     vulkanInstance.setExtensions(
         QByteArrayList() << "VK_KHR_get_physical_device_properties2");
