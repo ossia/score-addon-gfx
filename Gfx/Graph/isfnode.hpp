@@ -167,7 +167,6 @@ void main(void) {
   struct Rendered : RenderedNode
   {
     using RenderedNode::RenderedNode;
-    QElapsedTimer t;
 
     void customInit(Renderer& renderer) override
     {
