@@ -14,6 +14,10 @@
 #include <Gfx/Video/Inspector.hpp>
 #include <Gfx/Video/Layer.hpp>
 #include <Gfx/Video/Process.hpp>
+#include <Gfx/Mesh/Executor.hpp>
+#include <Gfx/Mesh/Inspector.hpp>
+#include <Gfx/Mesh/Layer.hpp>
+#include <Gfx/Mesh/Process.hpp>
 #include <score_addon_gfx_commands_files.hpp>
 #include <score_plugin_engine.hpp>
 
@@ -29,27 +33,40 @@ std::vector<std::unique_ptr<score::InterfaceBase>> score_addon_gfx::factories(
       score::ApplicationContext,
       FW<Device::ProtocolFactory, Gfx::GfxProtocolFactory>,
 
-      FW<Process::ProcessModelFactory,
-         Gfx::Filter::ProcessFactory,
-         Gfx::Video::ProcessFactory>,
-      FW<Process::LayerFactory,
-         Gfx::Filter::LayerFactory,
-         Gfx::Video::LayerFactory>,
-      FW<Execution::ProcessComponentFactory,
-         Gfx::Filter::ProcessExecutorComponentFactory,
-         Gfx::Video::ProcessExecutorComponentFactory>,
-      FW<Inspector::InspectorWidgetFactory,
-         Gfx::Filter::InspectorFactory,
-         Gfx::Video::InspectorFactory>,
-      FW<Process::PortFactory,
-         Gfx::TextureInletFactory,
-         Gfx::TextureOutletFactory>,
-      FW<Process::ProcessDropHandler,
-         Gfx::Filter::DropHandler,
-         Gfx::Video::DropHandler>,
-      FW<Library::LibraryInterface,
-         Gfx::Filter::LibraryHandler,
-         Gfx::Video::LibraryHandler>
+      FW<Process::ProcessModelFactory
+         , Gfx::Filter::ProcessFactory
+         , Gfx::Video::ProcessFactory
+         , Gfx::Mesh::ProcessFactory
+      >,
+      FW<Process::LayerFactory
+         , Gfx::Filter::LayerFactory
+         , Gfx::Video::LayerFactory
+         , Gfx::Mesh::LayerFactory
+      >,
+      FW<Execution::ProcessComponentFactory
+         , Gfx::Filter::ProcessExecutorComponentFactory
+         , Gfx::Video::ProcessExecutorComponentFactory
+         , Gfx::Mesh::ProcessExecutorComponentFactory
+      >,
+      FW<Inspector::InspectorWidgetFactory
+         , Gfx::Filter::InspectorFactory
+         , Gfx::Video::InspectorFactory
+         , Gfx::Mesh::InspectorFactory
+      >,
+      FW<Process::PortFactory
+         , Gfx::TextureInletFactory
+         , Gfx::TextureOutletFactory
+      >,
+      FW<Process::ProcessDropHandler
+         , Gfx::Filter::DropHandler
+         , Gfx::Video::DropHandler
+         , Gfx::Mesh::DropHandler
+      >,
+      FW<Library::LibraryInterface
+         , Gfx::Filter::LibraryHandler
+         , Gfx::Video::LibraryHandler
+         , Gfx::Mesh::LibraryHandler
+      >
       >(ctx, key);
 }
 

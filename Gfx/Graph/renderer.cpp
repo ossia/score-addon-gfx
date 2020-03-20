@@ -2,14 +2,38 @@
 
 #include "mesh.hpp"
 
-void Renderer::init(QRhi& rhi)
+MeshBuffers Renderer::initMeshBuffer(const Mesh& mesh)
 {
-  ready = false;
-  m_vertexBuffer = rhi.newBuffer(
+  if(auto it = m_vertexBuffers.find(&mesh); it != m_vertexBuffers.end())
+    return it->second;
+
+  auto& rhi = *state.rhi;
+  auto mesh_buf = rhi.newBuffer(
       QRhiBuffer::Immutable,
       QRhiBuffer::VertexBuffer,
-      sizeof(TexturedMesh::vertexArray));
-  m_vertexBuffer->build();
+      mesh.vertexArray.size() * sizeof(float));
+  mesh_buf->build();
+
+  QRhiBuffer* idx_buf{};
+  if(!mesh.indexArray.empty())
+  {
+    idx_buf = rhi.newBuffer(
+        QRhiBuffer::Immutable,
+        QRhiBuffer::IndexBuffer,
+        mesh.indexArray.size() * sizeof(unsigned int));
+    idx_buf->build();
+  }
+
+  MeshBuffers ret{mesh_buf, idx_buf};
+  m_vertexBuffers.insert({&mesh, ret});
+  buffersToUpload.push_back({&mesh, ret});
+  return ret;
+}
+
+void Renderer::init()
+{
+  auto& rhi = *state.rhi;
+  ready = false;
 
   m_rendererUBO = rhi.newBuffer(
       #if defined(_WIN32)
@@ -30,8 +54,13 @@ void Renderer::release()
   for (int i = 0; i < renderedNodes.size(); i++)
     renderedNodes[i]->release(*this);
 
-  delete m_vertexBuffer;
-  m_vertexBuffer = nullptr;
+  for (auto bufs : m_vertexBuffers)
+  {
+    delete bufs.second.mesh;
+    delete bufs.second.index;
+  }
+  m_vertexBuffers.clear();
+  buffersToUpload.clear();
 
   delete m_rendererUBO;
   m_rendererUBO = nullptr;
@@ -62,7 +91,7 @@ void Renderer::maybeRebuild()
     // Except the last one which is going to render to screen
     renderedNodes.back()->setScreenRenderTarget(state);
 
-    init(*state.rhi);
+    init();
     for (int i = 0; i < renderedNodes.size(); i++)
       renderedNodes[i]->init(*this);
 
@@ -84,14 +113,7 @@ void Renderer::render()
 
   for (int i = 0; i < renderedNodes.size(); i++)
   {
-    auto node = renderedNodes[i];
-
-    node->update(*this, *updateBatch);
-
-    commands->beginPass(
-        node->m_renderTarget, Qt::black, {1.0f, 0}, updateBatch);
-    draw(*node, *commands);
-    commands->endPass();
+    renderedNodes[i]->runPass(*this, *commands, *updateBatch);
 
     if (i < renderedNodes.size() - 1)
       updateBatch = state.rhi->nextResourceUpdateBatch();
@@ -103,9 +125,6 @@ void Renderer::update(QRhiResourceUpdateBatch& res)
   if (!ready)
   {
     ready = true;
-
-    res.uploadStaticBuffer(
-        m_vertexBuffer, 0, m_vertexBuffer->size(), TexturedMesh::vertexArray);
 
     const auto proj = state.rhi->clipSpaceCorrMatrix();
 
@@ -119,7 +138,7 @@ void Renderer::update(QRhiResourceUpdateBatch& res)
       screenUBO.texcoordAdjust[0] = -1.f;
       screenUBO.texcoordAdjust[1] = 1.f;
     }
-    memcpy(&screenUBO.mvp[0], proj.data(), sizeof(float) * 16);
+    memcpy(&screenUBO.clipSpaceCorrMatrix[0], proj.data(), sizeof(float) * 16);
 
     screenUBO.renderSize[0] = this->lastSize.width();
     screenUBO.renderSize[1] = this->lastSize.height();
@@ -130,18 +149,16 @@ void Renderer::update(QRhiResourceUpdateBatch& res)
     res.uploadStaticBuffer(m_rendererUBO, 0, sizeof(ScreenUBO), &screenUBO);
 #endif
   }
-}
 
-void Renderer::draw(RenderedNode& node, QRhiCommandBuffer& cb)
-{
-  const auto sz = state.swapChain->currentPixelSize();
-  cb.setGraphicsPipeline(node.pipeline());
-  cb.setShaderResources(node.resources());
-  cb.setViewport(QRhiViewport(0, 0, sz.width(), sz.height()));
+  if(Q_UNLIKELY(!buffersToUpload.empty()))
+  {
+    for(auto [mesh, buf]: buffersToUpload)
+    {
+      res.uploadStaticBuffer(buf.mesh, 0, buf.mesh->size(), mesh->vertexArray.data());
+      if(buf.index)
+        res.uploadStaticBuffer(buf.index, 0, buf.index->size(), mesh->indexArray.data());
+    }
 
-  const QRhiCommandBuffer::VertexInput bindings[]
-      = {{m_vertexBuffer, 0}, {m_vertexBuffer, 3 * 2 * sizeof(float)}};
-
-  cb.setVertexInput(0, 2, bindings);
-  cb.draw(3);
+    buffersToUpload.clear();
+  }
 }

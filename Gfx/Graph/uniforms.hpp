@@ -18,6 +18,7 @@ enum class Types
   Vec4,
   Image,
   Audio,
+  Camera,
 };
 
 using ValueVariant = std::variant<

@@ -249,7 +249,7 @@ std::shared_ptr<Renderer> Graph::createRenderer(OutputNode* output, RenderState 
       const_cast<NodeModel&>(rn->node).renderedNodes[&r] = rn;
     }
 
-    r.init(*r.state.rhi);
+    r.init();
 
     if (model_nodes.size() > 1)
     {

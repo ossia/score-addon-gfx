@@ -1,4 +1,5 @@
 #pragma once
+#include "mesh.hpp"
 #include "renderstate.hpp"
 #include "uniforms.hpp"
 
@@ -14,7 +15,7 @@
 class NodeModel;
 struct Port;
 struct Edge;
-class Renderer;
+struct Renderer;
 struct AudioTexture
 {
   std::unordered_map<Renderer*, std::pair<QRhiSampler*, QRhiTexture*>> samplers;
@@ -86,6 +87,27 @@ struct
 #pragma pack()
 #endif
 
+
+#if defined(_MSC_VER)
+#pragma pack(push, 1)
+#endif
+struct
+#if defined(__GNUC__) || defined(__clang__)
+    __attribute__((packed))
+#endif
+    ModelCameraUBO
+{
+  float mvp[16]{};
+  float mv[16]{};
+  float model[16]{};
+  float view[16]{};
+  float projection[16]{};
+  float modelNormal[9]{};
+};
+#if defined(_MSC_VER)
+#pragma pack()
+#endif
+static_assert(sizeof(ModelCameraUBO) == sizeof(float) * (16 + 16 + 16 + 16 + 16 + 9));
 struct Renderer;
 class RenderedNode;
 class NodeModel
@@ -94,9 +116,9 @@ class NodeModel
 
 public:
   explicit NodeModel();
-  explicit NodeModel(QString frag);
-  explicit NodeModel(QString vert, QString frag);
   virtual ~NodeModel();
+
+  virtual const Mesh& mesh() const noexcept = 0;
 
   virtual RenderedNode* createRenderer() const noexcept;
 
@@ -139,6 +161,9 @@ public:
   QRhiShaderResourceBindings* m_srb{};
   QRhiGraphicsPipeline* m_ps{};
 
+  QRhiBuffer* m_meshBuffer{};
+  QRhiBuffer* m_idxBuffer{};
+
   QRhiBuffer* m_processUBO{};
 
   QRhiBuffer* m_materialUBO{};
@@ -162,6 +187,8 @@ public:
   virtual void customRelease(Renderer&);
   void release(Renderer&);
   void releaseWithoutRenderTarget(Renderer&);
+
+  void runPass(Renderer&, QRhiCommandBuffer& commands, QRhiResourceUpdateBatch& updateBatch);
 
   QRhiGraphicsPipeline* pipeline() { return m_ps; }
   QRhiShaderResourceBindings* resources() { return m_srb; }

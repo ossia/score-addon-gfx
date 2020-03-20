@@ -10,7 +10,7 @@ struct
 #endif
     ScreenUBO
 {
-  float mvp[16]{};
+  float clipSpaceCorrMatrix[16]{};
   float texcoordAdjust[2]{};
 
   float renderSize[2]{};
@@ -19,6 +19,11 @@ struct
 #if defined(_MSC_VER)
 #pragma pack()
 #endif
+
+struct MeshBuffers {
+  QRhiBuffer* mesh{};
+  QRhiBuffer* index{};
+};
 
 struct Renderer
 {
@@ -29,7 +34,8 @@ struct Renderer
   QSize lastSize{};
 
   // Mesh
-  QRhiBuffer* m_vertexBuffer = nullptr;
+  ossia::flat_map<const Mesh*, MeshBuffers> m_vertexBuffers;
+  MeshBuffers initMeshBuffer(const Mesh& mesh);
 
   // Material
   ScreenUBO screenUBO;
@@ -39,13 +45,15 @@ struct Renderer
 
   bool ready{};
 
-  void init(QRhi& rhi);
+  void init();
   void release();
 
   void render();
 
   void update(QRhiResourceUpdateBatch& res);
-  void draw(RenderedNode& node, QRhiCommandBuffer& cb);
 
   void maybeRebuild();
+
+private:
+  ossia::small_vector<std::pair<const Mesh* const, MeshBuffers>, 4> buffersToUpload;
 };

@@ -10,8 +10,8 @@
 #include <Gfx/Graph/nodes.hpp>
 #include <Gfx/TexturePort.hpp>
 #include <wobjectimpl.h>
-W_OBJECT_IMPL(Gfx::Filter::Model)
-namespace Gfx::Filter
+W_OBJECT_IMPL(Gfx::Mesh::Model)
+namespace Gfx::Mesh
 {
 
 Model::Model(
@@ -30,8 +30,8 @@ layout(location = 0) out vec4 fragColor;
 // Shared uniform buffer for the whole render window
 layout(std140, binding = 0) uniform renderer_t {
   mat4 clipSpaceCorrMatrix;
-  vec2 texcoordAdjust;
 
+  vec2 texcoordAdjust;
   vec2 renderSize;
 };
 
@@ -105,9 +105,18 @@ void Model::setFragment(QString f)
   outletsChanged();
 }
 
+void Model::setMesh(QString f)
+{
+  if(m_mesh != f)
+  {
+    m_mesh = f;
+    meshChanged(m_mesh);
+  }
+}
+
 QString Model::prettyName() const noexcept
 {
-  return tr("GFX Filter");
+  return tr("GFX Mesh");
 }
 
 void Model::setupIsf(const isf::descriptor& desc)
@@ -280,12 +289,12 @@ QSet<QString> DropHandler::mimeTypes() const noexcept
 
 QSet<QString> LibraryHandler::acceptedFiles() const noexcept
 {
-  return {"frag", "glsl", "fs"};
+  return {"obj", "gltf"};
 }
 
 QSet<QString> DropHandler::fileExtensions() const noexcept
 {
-  return {"frag", "glsl", "fs"};
+  return {"obj", "gltf"};
 }
 
 std::vector<Process::ProcessDropHandler::ProcessDrop> DropHandler::dropData(
@@ -297,12 +306,12 @@ std::vector<Process::ProcessDropHandler::ProcessDrop> DropHandler::dropData(
     for (const auto& [filename, file] : data)
     {
       Process::ProcessDropHandler::ProcessDrop p;
-      p.creation.key = Metadata<ConcreteKey_k, Gfx::Filter::Model>::get();
+      p.creation.key = Metadata<ConcreteKey_k, Gfx::Mesh::Model>::get();
       p.creation.prettyName = QFileInfo{filename}.baseName();
       p.setup
           = [str = file](Process::ProcessModel& m, score::Dispatcher& disp) {
-              auto& midi = static_cast<Gfx::Filter::Model&>(m);
-              disp.submit(new ChangeFragmentShader{midi, QString{str}});
+              auto& midi = static_cast<Gfx::Mesh::Model&>(m);
+              disp.submit(new ChangeMesh{midi, QString{str}});
             };
       vec.push_back(std::move(p));
     }
@@ -311,16 +320,16 @@ std::vector<Process::ProcessDropHandler::ProcessDrop> DropHandler::dropData(
 }
 }
 template <>
-void DataStreamReader::read(const Gfx::Filter::Model& proc)
+void DataStreamReader::read(const Gfx::Mesh::Model& proc)
 {
   readPorts(*this, proc.m_inlets, proc.m_outlets);
 
-  m_stream << proc.m_fragment;
+  m_stream << proc.m_fragment << proc.m_mesh;
   insertDelimiter();
 }
 
 template <>
-void DataStreamWriter::write(Gfx::Filter::Model& proc)
+void DataStreamWriter::write(Gfx::Mesh::Model& proc)
 {
   writePorts(
       *this,
@@ -332,18 +341,20 @@ void DataStreamWriter::write(Gfx::Filter::Model& proc)
   QString s;
   m_stream >> s;
   proc.setFragment(s);
+  m_stream >> proc.m_mesh;
   checkDelimiter();
 }
 
 template <>
-void JSONObjectReader::read(const Gfx::Filter::Model& proc)
+void JSONObjectReader::read(const Gfx::Mesh::Model& proc)
 {
   readPorts(obj, proc.m_inlets, proc.m_outlets);
   obj["Fragment"] = proc.fragment();
+  obj["Mesh"] = proc.mesh();
 }
 
 template <>
-void JSONObjectWriter::write(Gfx::Filter::Model& proc)
+void JSONObjectWriter::write(Gfx::Mesh::Model& proc)
 {
   writePorts(
       obj,
@@ -352,4 +363,5 @@ void JSONObjectWriter::write(Gfx::Filter::Model& proc)
       proc.m_outlets,
       &proc);
   proc.setFragment(obj["Fragment"].toString());
+  proc.setMesh(obj["Mesh"].toString());
 }

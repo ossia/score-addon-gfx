@@ -1,11 +1,15 @@
 #pragma once
 #include "node.hpp"
+#include "mesh.hpp"
 
 #include <QtShaderTools/QShaderBaker>
 struct FilterNode : NodeModel
 {
-  FilterNode(QString frag) : NodeModel{frag}
+  const TexturedTriangle& m_mesh = TexturedTriangle::instance();
+  FilterNode(QString frag)
   {
+    setShaders(m_mesh.defaultVertexShader(), frag);
+
     const auto& d = m_fragmentS.description();
     for (auto& ub : d.combinedImageSamplers())
     {
@@ -86,5 +90,6 @@ struct FilterNode : NodeModel
     output.push_back(new Port{this, {}, Types::Image, {}});
   }
 
+  const Mesh& mesh() const noexcept override { return this->m_mesh; }
   virtual ~FilterNode();
 };

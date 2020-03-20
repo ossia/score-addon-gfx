@@ -30,6 +30,15 @@ set(HDRS
     Gfx/Filter/View.hpp
     Gfx/Filter/Layer.hpp
 
+    Gfx/Mesh/Executor.hpp
+    Gfx/Mesh/Inspector.hpp
+    Gfx/Mesh/LocalTree.hpp
+    Gfx/Mesh/Metadata.hpp
+    Gfx/Mesh/Presenter.hpp
+    Gfx/Mesh/Process.hpp
+    Gfx/Mesh/View.hpp
+    Gfx/Mesh/Layer.hpp
+
     Gfx/Video/Executor.hpp
     Gfx/Video/Inspector.hpp
     Gfx/Video/LocalTree.hpp
@@ -53,6 +62,7 @@ set(HDRS
     Gfx/Graph/renderer.hpp
     Gfx/Graph/videodecoder.hpp
     Gfx/Graph/videonode.hpp
+    Gfx/Graph/phongnode.hpp
 
     Gfx/GfxApplicationPlugin.hpp
     Gfx/GfxContext.hpp
@@ -60,6 +70,7 @@ set(HDRS
     Gfx/GfxDevice.hpp
     Gfx/TexturePort.hpp
 
+    3rdparty/icosphere/Icosphere.h
     # Gfx/graph/hap/source/hap.h
 
     score_addon_gfx.hpp
@@ -73,6 +84,13 @@ set(SRCS
     Gfx/Filter/Process.cpp
     Gfx/Filter/View.cpp
 
+    Gfx/Mesh/Executor.cpp
+    Gfx/Mesh/Inspector.cpp
+    Gfx/Mesh/LocalTree.cpp
+    Gfx/Mesh/Presenter.cpp
+    Gfx/Mesh/Process.cpp
+    Gfx/Mesh/View.cpp
+
     Gfx/Video/Executor.cpp
     Gfx/Video/Inspector.cpp
     Gfx/Video/LocalTree.cpp
@@ -83,6 +101,9 @@ set(SRCS
     Gfx/Graph/node.cpp
     Gfx/Graph/graph.cpp
     Gfx/Graph/renderer.cpp
+    Gfx/Graph/mesh.cpp
+    Gfx/Graph/isfnode.cpp
+    Gfx/Graph/phongnode.cpp
 
     Gfx/GfxApplicationPlugin.cpp
     Gfx/GfxDevice.cpp
@@ -90,6 +111,8 @@ set(SRCS
     Gfx/TexturePort.cpp
 
     # Gfx/graph/hap/source/hap.c
+
+    3rdparty/icosphere/Icosphere.cpp
 
     score_addon_gfx.cpp
 )

@@ -22,9 +22,15 @@ struct OutputNode : NodeModel
 
   std::shared_ptr<Window> window{};
 
+  const TexturedTriangle& m_mesh = TexturedTriangle::instance();
 protected:
-  OutputNode() : NodeModel{filter} {}
+  OutputNode()
+  {
+    setShaders(m_mesh.defaultVertexShader(), filter);
+  }
+  const Mesh& mesh() const noexcept override { return this->m_mesh; }
 };
+
 
 struct ColorNode : NodeModel
 {
@@ -43,13 +49,16 @@ struct ColorNode : NodeModel
     }
     )_";
 
-  ColorNode() : NodeModel{filter}
+  const TexturedTriangle& m_mesh = TexturedTriangle::instance();
+  ColorNode()
   {
+    setShaders(m_mesh.defaultVertexShader(), filter);
     input.push_back(new Port{this, {}, Types::Vec4, {}});
     //input.back()->value = ossia::vec4f{0.6, 0.3, 0.78, 1.};
     output.push_back(new Port{this, {}, Types::Image, {}});
   }
 
+  const Mesh& mesh() const noexcept override { return this->m_mesh; }
   virtual ~ColorNode();
 };
 
@@ -65,10 +74,13 @@ struct NoiseNode : NodeModel
     }
     )_";
 
-  NoiseNode() : NodeModel{filter}
+  const TexturedTriangle& m_mesh = TexturedTriangle::instance();
+  NoiseNode()
   {
+    setShaders(m_mesh.defaultVertexShader(), filter);
     output.push_back(new Port{this, {}, Types::Image, {}});
   }
+  const Mesh& mesh() const noexcept override { return this->m_mesh; }
   virtual ~NoiseNode();
 };
 
@@ -88,12 +100,16 @@ struct ProductNode : NodeModel
         fragColor = c1 + c2;
     }
     )_";
-  ProductNode() : NodeModel{filter}
+
+  const TexturedTriangle& m_mesh = TexturedTriangle::instance();
+  ProductNode()
   {
+    setShaders(m_mesh.defaultVertexShader(), filter);
     input.push_back(new Port{this, {}, Types::Image, {}});
     input.push_back(new Port{this, {}, Types::Image, {}});
     output.push_back(new Port{this, {}, Types::Image, {}});
   }
+  const Mesh& mesh() const noexcept override { return this->m_mesh; }
   virtual ~ProductNode();
 };
 
@@ -105,3 +121,4 @@ struct ScreenNode : OutputNode
   }
   virtual ~ScreenNode();
 };
+

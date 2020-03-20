@@ -6,16 +6,6 @@
 
 NodeModel::NodeModel() {}
 
-NodeModel::NodeModel(QString frag)
-{
-  setShaders(TexturedMesh::vertexShader, frag);
-}
-
-NodeModel::NodeModel(QString vert, QString frag)
-{
-  setShaders(vert, frag);
-}
-
 void RenderedNode::createRenderTarget(const RenderState& state)
 {
   auto sz = state.swapChain->surfacePixelSize();
@@ -90,6 +80,15 @@ void RenderedNode::init(Renderer& renderer)
   auto& rhi = *renderer.state.rhi;
 
   auto& input = node.input;
+
+  const auto& mesh = node.mesh();
+  if (!m_meshBuffer)
+  {
+    auto [mbuffer,ibuffer] = renderer.initMeshBuffer(mesh);
+    m_meshBuffer = mbuffer;
+    m_idxBuffer = ibuffer;
+  }
+
   m_processUBO = rhi.newBuffer(
       QRhiBuffer::Dynamic, QRhiBuffer::UniformBuffer, sizeof(ProcessUBO));
   m_processUBO->build();
@@ -138,6 +137,9 @@ void RenderedNode::init(Renderer& renderer)
         }
         case Types::Audio:
           break;
+        case Types::Camera:
+          m_materialSize += sizeof(ModelCameraUBO);
+          break;
       }
     }
 
@@ -163,15 +165,15 @@ void RenderedNode::init(Renderer& renderer)
 
     m_ps->setDepthTest(false);
     m_ps->setDepthWrite(false);
+    // m_ps->setCullMode(QRhiGraphicsPipeline::CullMode::Back);
+    // m_ps->setFrontFace(QRhiGraphicsPipeline::FrontFace::CCW);
 
     m_ps->setShaderStages({{QRhiShaderStage::Vertex, node.m_vertexS},
                            {QRhiShaderStage::Fragment, node.m_fragmentS}});
 
     QRhiVertexInputLayout inputLayout;
-    inputLayout.setBindings(
-        {TexturedMesh::m_vertexInputBindings[0], TexturedMesh::m_vertexInputBindings[1]});
-    inputLayout.setAttributes({TexturedMesh::m_vertexAttributeBindings[0],
-                               TexturedMesh::m_vertexAttributeBindings[1]});
+    inputLayout.setBindings(mesh.vertexInputBindings.begin(), mesh.vertexInputBindings.end());
+    inputLayout.setAttributes(mesh.vertexAttributeBindings.begin(), mesh.vertexAttributeBindings.end());
     m_ps->setVertexInputLayout(inputLayout);
 
     // Shader resource bindings
@@ -274,6 +276,29 @@ void RenderedNode::releaseWithoutRenderTarget(Renderer& r)
 
   delete m_srb;
   m_srb = nullptr;
+
+  m_meshBuffer = nullptr;
+}
+
+void RenderedNode::runPass(Renderer& renderer, QRhiCommandBuffer& cb, QRhiResourceUpdateBatch& updateBatch)
+{
+  update(renderer, updateBatch);
+
+  cb.beginPass(m_renderTarget, Qt::black, {1.0f, 0}, &updateBatch);
+  {
+    const auto sz = renderer.state.swapChain->currentPixelSize();
+    cb.setGraphicsPipeline(pipeline());
+    cb.setShaderResources(resources());
+    cb.setViewport(QRhiViewport(0, 0, sz.width(), sz.height()));
+
+    assert(this->m_meshBuffer);
+    assert(this->m_meshBuffer->usage().testFlag(QRhiBuffer::VertexBuffer));
+    node.mesh().setupBindings(*this->m_meshBuffer, this->m_idxBuffer, cb);
+
+    cb.draw(node.mesh().vertexCount);
+  }
+
+  cb.endPass();
 }
 void RenderedNode::release(Renderer& r)
 {

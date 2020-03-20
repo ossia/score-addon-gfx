@@ -15,7 +15,7 @@ struct YUV420Node : NodeModel
   static const constexpr auto filter = R"_(#version 450
 
   layout(std140, binding = 0) uniform buf {
-  mat4 mvp;
+  mat4 clipSpaceCorrMatrix;
   vec2 texcoordAdjust;
   } tbuf;
 
@@ -46,11 +46,16 @@ struct YUV420Node : NodeModel
     fragColor.b = dot(yuv, B_cf);
   })_";
 
+  const TexturedTriangle& m_mesh = TexturedTriangle::instance();
   YUV420Node(std::shared_ptr<video_decoder> dec)
-      : NodeModel{filter}, decoder{std::move(dec)}
+      : decoder{std::move(dec)}
   {
+    setShaders(m_mesh.defaultVertexShader(), filter);
+
     output.push_back(new Port{this, {}, Types::Image, {}});
   }
+
+  const Mesh& mesh() const noexcept override { return this->m_mesh; }
 
   struct Rendered : RenderedNode
   {
@@ -134,9 +139,9 @@ struct YUV420Node : NodeModel
       {
         if (auto frame = decoder.dequeue_frame())
         {
-          setYPixels(renderer, res, frame->data[0], frame->linesize[0]);
-          setUPixels(renderer, res, frame->data[1], frame->linesize[1]);
-          setVPixels(renderer, res, frame->data[2], frame->linesize[2]);
+          setYPixels(res, frame->data[0], frame->linesize[0]);
+          setUPixels(res, frame->data[1], frame->linesize[1]);
+          setVPixels(res, frame->data[2], frame->linesize[2]);
 
           framesToFree.push_back(frame);
         }
@@ -151,7 +156,6 @@ struct YUV420Node : NodeModel
     }
 
     void setYPixels(
-        Renderer& renderer,
         QRhiResourceUpdateBatch& res,
         uint8_t* pixels,
         int stride) const noexcept
@@ -168,7 +172,6 @@ struct YUV420Node : NodeModel
     }
 
     void setUPixels(
-        Renderer& renderer,
         QRhiResourceUpdateBatch& res,
         uint8_t* pixels,
         int stride) const noexcept
@@ -185,7 +188,6 @@ struct YUV420Node : NodeModel
     }
 
     void setVPixels(
-        Renderer& renderer,
         QRhiResourceUpdateBatch& res,
         uint8_t* pixels,
         int stride) const noexcept
@@ -215,7 +217,7 @@ struct RGB0Node : NodeModel
 
   static const constexpr auto filter = R"_(#version 450
   layout(std140, binding = 0) uniform buf {
-  mat4 mvp;
+  mat4 clipSpaceCorrMatrix;
   vec2 texcoordAdjust;
   } tbuf;
 
@@ -279,7 +281,7 @@ struct RGB0Node : NodeModel
       {
         if (auto frame = decoder.dequeue_frame())
         {
-          setPixels(renderer, res, frame->data[0], frame->linesize[0]);
+          setPixels(res, frame->data[0], frame->linesize[0]);
 
           framesToFree.push_back(frame);
         }
@@ -294,7 +296,6 @@ struct RGB0Node : NodeModel
     }
 
     void setPixels(
-        Renderer& renderer,
         QRhiResourceUpdateBatch& res,
         uint8_t* pixels,
         int stride) const noexcept
@@ -317,14 +318,17 @@ struct RGB0Node : NodeModel
     }*/
   };
 
+  const TexturedTriangle& m_mesh = TexturedTriangle::instance();
   RGB0Node(std::shared_ptr<video_decoder> dec)
-      : NodeModel{filter}, decoder{std::move(dec)}
+      : decoder{std::move(dec)}
   {
+    setShaders(m_mesh.defaultVertexShader(), filter);
     output.push_back(new Port{this, {}, Types::Image, {}});
   }
 
   virtual ~RGB0Node() {}
 
+  const Mesh& mesh() const noexcept override { return this->m_mesh; }
   RenderedNode* createRenderer() const noexcept override
   {
     return new Rendered{*this};
