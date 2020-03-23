@@ -225,9 +225,10 @@ struct RenderedISFNode : RenderedNode
         {
           if(b.data()->type == QRhiShaderResourceBinding::Type::SampledTexture)
           {
-            if(b.data()->u.stex.sampler == rhiSampler)
+            SCORE_ASSERT(b.data()->u.stex.count >= 1);
+            if(b.data()->u.stex.texSamplers[0].sampler == rhiSampler)
             {
-              b.data()->u.stex.tex = rhiTexture ? rhiTexture : renderer.m_emptyTexture;
+              b.data()->u.stex.texSamplers[0].tex = rhiTexture ? rhiTexture : renderer.m_emptyTexture;
             }
           }
         }

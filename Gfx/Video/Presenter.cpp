@@ -29,7 +29,7 @@ Presenter::Presenter(
     View* view,
     const Process::Context& ctx,
     QObject* parent)
-    : Process::LayerPresenter{ctx, parent}, m_model{layer}, m_view{view}
+    : Process::LayerPresenter{layer, view, ctx, parent}, m_model{layer}, m_view{view}
 {
   auto& portFactory = ctx.app.interfaces<Process::PortFactoryList>();
   for (auto& e : layer.inlets())
@@ -66,15 +66,6 @@ void Presenter::on_zoomRatioChanged(ZoomRatio) {}
 
 void Presenter::parentGeometryChanged() {}
 
-const Process::ProcessModel& Presenter::model() const
-{
-  return m_model;
-}
-
-const Id<Process::ProcessModel>& Presenter::modelId() const
-{
-  return m_model.id();
-}
 void Presenter::setupInlet(
     Process::ControlInlet& port,
     const Process::PortFactoryList& portFactory,
