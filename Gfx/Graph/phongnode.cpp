@@ -114,8 +114,6 @@ struct RenderedPhongNode : RenderedNode
   {
   }
 
-private:
-  QRhiBuffer* m_modelUBO{};
 };
 
 

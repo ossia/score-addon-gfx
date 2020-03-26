@@ -83,7 +83,7 @@ public:
       m_newlyExposed = false;
     }
 
-    QRhi::FrameOpResult r = state.rhi->beginFrame(state.swapChain, 0);
+    QRhi::FrameOpResult r = state.rhi->beginFrame(state.swapChain, {});
     if (r == QRhi::FrameOpSwapChainOutOfDate)
     {
       resizeSwapChain();
@@ -102,7 +102,7 @@ public:
 
     onRender();
 
-    state.rhi->endFrame(state.swapChain, 0);
+    state.rhi->endFrame(state.swapChain, {});
 
     requestUpdate();
   }

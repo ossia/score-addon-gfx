@@ -6,6 +6,8 @@
 #include "uniforms.hpp"
 #include "videodecoder.hpp"
 
+#include <Video/VideoDecoder.hpp>
+using video_decoder = ::Video::VideoDecoder;
 struct YUV420Node : NodeModel
 {
   std::shared_ptr<video_decoder> decoder;

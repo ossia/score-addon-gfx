@@ -9,8 +9,10 @@
 #include <Gfx/CommandFactory.hpp>
 #include <Gfx/Graph/videodecoder.hpp>
 #include <Gfx/Video/Metadata.hpp>
+#include <Video/VideoDecoder.hpp>
 namespace Gfx::Video
 {
+using video_decoder = ::Video::VideoDecoder;
 class Model final : public Process::ProcessModel
 {
   SCORE_SERIALIZE_FRIENDS

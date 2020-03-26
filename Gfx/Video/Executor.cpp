@@ -11,6 +11,11 @@
 #include <Gfx/GfxExec.hpp>
 #include <Gfx/Graph/videonode.hpp>
 #include <Gfx/Video/Process.hpp>
+
+extern "C"
+{
+#include <libavutil/pixdesc.h>
+}
 namespace Gfx::Video
 {
 class video_node final : public gfx_exec_node

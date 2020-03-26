@@ -22,7 +22,7 @@
 #include <QOffscreenSurface>
 #include <QWindow>
 
-class Renderer;
+struct Renderer;
 enum GraphicsApi
 {
   Null,
@@ -53,7 +53,7 @@ struct RenderState
     if (graphicsApi == Null)
     {
       QRhiNullInitParams params;
-      state.rhi = QRhi::create(QRhi::Null, &params, 0);
+      state.rhi = QRhi::create(QRhi::Null, &params, {});
     }
 
 #ifndef QT_NO_OPENGL
@@ -63,7 +63,7 @@ struct RenderState
       QRhiGles2InitParams params;
       params.fallbackSurface = state.surface;
       params.window = &window;
-      state.rhi = QRhi::create(QRhi::OpenGLES2, &params, 0);
+      state.rhi = QRhi::create(QRhi::OpenGLES2, &params, {});
     }
 #endif
 
@@ -73,7 +73,7 @@ struct RenderState
       QRhiVulkanInitParams params;
       params.inst = window.vulkanInstance();
       params.window = &window;
-      state.rhi = QRhi::create(QRhi::Vulkan, &params, 0);
+      state.rhi = QRhi::create(QRhi::Vulkan, &params, {});
     }
 #endif
 
@@ -87,7 +87,7 @@ struct RenderState
       //   params.framesUntilKillingDeviceViaTdr = framesUntilTdr;
       //   params.repeatDeviceKill = true;
       // }
-      state.rhi = QRhi::create(QRhi::D3D11, &params, 0);
+      state.rhi = QRhi::create(QRhi::D3D11, &params, {});
     }
 #endif
 
@@ -95,7 +95,7 @@ struct RenderState
     if (graphicsApi == Metal)
     {
       QRhiMetalInitParams params;
-      state.rhi = QRhi::create(QRhi::Metal, &params, 0);
+      state.rhi = QRhi::create(QRhi::Metal, &params, {});
       if (!state.rhi)
         qFatal("Failed to create METAL backend");
     }
@@ -115,7 +115,7 @@ struct RenderState
     state.swapChain->setWindow(&window);
     // state.swapChain->setDepthStencil(state.renderBuffer);
     state.swapChain->setSampleCount(1);
-    state.swapChain->setFlags(0);
+    state.swapChain->setFlags({});
     state.renderPassDescriptor
         = state.swapChain->newCompatibleRenderPassDescriptor();
     state.swapChain->setRenderPassDescriptor(state.renderPassDescriptor);

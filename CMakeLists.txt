@@ -130,7 +130,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
    Qt5::ShaderTools  Qt5::GuiPrivate
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE
-  avcodec avformat swresample avutil isf)
+  avcodec avformat swresample avutil score_plugin_media isf)
 
 if(APPLE)
     find_library(QuartzCore_FK QuartzCore)

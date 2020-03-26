@@ -102,6 +102,8 @@ struct gfx_view_node
             memcpy(value, &fv, 4);
             break;
           }
+          default:
+            break;
         }
       }
       void operator()(float v) const noexcept {
@@ -118,6 +120,8 @@ struct gfx_view_node
             memcpy(value, &v, 4);
             break;
           }
+          default:
+            break;
         }
       }
       void operator()(bool v) const noexcept {
@@ -152,6 +156,8 @@ struct gfx_view_node
             memcpy(value, &fv, 4);
             break;
           }
+          default:
+            break;
         }
       }
       void operator()(const std::string& v) const noexcept {}
