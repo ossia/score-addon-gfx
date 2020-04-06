@@ -16,12 +16,13 @@ InspectorWidget::InspectorWidget(
     , m_dispatcher{context.commandStack}
 {
   auto lay = new QFormLayout{this};
+  /*
   auto edit = new QLineEdit{object.path(), this};
   lay->addRow(tr("Path"), edit);
 
   connect(edit, &QLineEdit::editingFinished, this, [this, edit] {
     this->m_dispatcher.submit<ChangeImages>(this->process(), edit->text());
-  });
+  });*/
 }
 
 InspectorWidget::~InspectorWidget() {}

@@ -32,6 +32,8 @@ struct FilterNode : NodeModel
           case QShaderDescription::Int2:
           case QShaderDescription::Vec2:
             sz += 8;
+            if(sz % 8 != 0)
+              sz += 4;
             break;
           case QShaderDescription::Int3:
           case QShaderDescription::Vec3:
@@ -50,8 +52,9 @@ struct FilterNode : NodeModel
 
       m_materialData.reset(new char[sz]);
       std::fill_n(m_materialData.get(), sz, 0);
-      char* cur = m_materialData.get();
 
+      char* cur = m_materialData.get();
+      char* orig = cur;
       for (auto& u : ub.members)
       {
         switch (u.type)
@@ -68,6 +71,8 @@ struct FilterNode : NodeModel
           case QShaderDescription::Vec2:
             input.push_back(new Port{this, cur, Types::Vec2, {}});
             cur += 8;
+            if((cur-orig) % 8 != 0)
+              cur += 4;
             break;
           case QShaderDescription::Int3:
           case QShaderDescription::Vec3:

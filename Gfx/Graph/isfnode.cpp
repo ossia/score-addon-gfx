@@ -219,22 +219,7 @@ struct RenderedISFNode : RenderedNode
 
       if(textureChanged)
       {
-        std::vector<QRhiShaderResourceBinding> tmp;
-        tmp.assign(m_srb->cbeginBindings(), m_srb->cendBindings());
-        for(QRhiShaderResourceBinding& b : tmp)
-        {
-          if(b.data()->type == QRhiShaderResourceBinding::Type::SampledTexture)
-          {
-            SCORE_ASSERT(b.data()->u.stex.count >= 1);
-            if(b.data()->u.stex.texSamplers[0].sampler == rhiSampler)
-            {
-              b.data()->u.stex.texSamplers[0].tex = rhiTexture ? rhiTexture : renderer.m_emptyTexture;
-            }
-          }
-        }
-        m_srb->release();
-        m_srb->setBindings(tmp.begin(), tmp.end());
-        m_srb->build();
+        replaceTexture(rhiSampler, rhiTexture ? rhiTexture : renderer.m_emptyTexture);
       }
 
       if(rhiTexture)

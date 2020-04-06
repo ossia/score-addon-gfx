@@ -9,14 +9,14 @@ class Model;
 PROCESS_METADATA(
     ,
     Gfx::Images::Model,
-    "32dc5341-7748-4c31-a226-82e6bd685744",
-    "video",                           // Internal name
-    "Images",                           // Pretty name
+    "e96c5c0b-7e09-49fb-a851-ff6f4811bb00",
+    "images",                          // Internal name
+    "Images",                          // Pretty name
     Process::ProcessCategory::Visual,  // Category
     "GFX",                             // Category
-    "Display a video",                 // Description
+    "Display a set of images",         // Description
     "ossia team",                      // Author
-    (QStringList{"gfx", "video"}),     // Tags
+    (QStringList{"gfx", "image"}),     // Tags
     {},                                // Inputs
     {},                                // Outputs
     Process::ProcessFlags::SupportsAll // Flags

@@ -8,5 +8,5 @@
 namespace Gfx::Images
 {
 using LayerFactory = Process::
-    LayerFactory_T<Gfx::Images::Model, Gfx::Video::Presenter, Gfx::Video::View>;
+    LayerFactory_T<Gfx::Images::Model, Gfx::Images::Presenter, Gfx::Images::View>;
 }

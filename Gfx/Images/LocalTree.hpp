@@ -8,7 +8,7 @@ class Model;
 
 class LocalTreeProcessComponent : public LocalTree::ProcessComponent_T<Model>
 {
-  COMPONENT_METADATA("f59d2fba-b65f-4123-b5b7-1740f459aab2")
+  COMPONENT_METADATA("a6010842-9b36-43d2-978e-50273935d21b")
 
 public:
   LocalTreeProcessComponent(

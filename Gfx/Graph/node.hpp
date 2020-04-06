@@ -190,6 +190,8 @@ public:
 
   void runPass(Renderer&, QRhiCommandBuffer& commands, QRhiResourceUpdateBatch& updateBatch);
 
+  void replaceTexture(QRhiSampler* sampler, QRhiTexture* newTexture);
+
   QRhiGraphicsPipeline* pipeline() { return m_ps; }
   QRhiShaderResourceBindings* resources() { return m_srb; }
 };

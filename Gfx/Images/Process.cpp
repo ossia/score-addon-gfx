@@ -21,20 +21,25 @@ Model::Model(
     : Process::ProcessModel{duration, id, "gfxProcess", parent}
 {
   metadata().setInstanceName(*this);
+  m_inlets.push_back(new Process::IntSpinBox{Id<Process::Port>(0), this});
+  m_inlets.back()->setCustomData(tr("Index"));
+  m_inlets.push_back(new Process::XYSlider{Id<Process::Port>(1), this});
+  m_inlets.back()->setCustomData(tr("Position"));
+
   m_outlets.push_back(new TextureOutlet{Id<Process::Port>(0), this});
+
+  m_images.push_back({"/home/jcelerier/Documents/ossia.png",
+                      QImage("/home/jcelerier/Documents/ossia.png")});
+  m_images.push_back({"/home/jcelerier/Documents/IMG_1929.JPG",
+                      QImage("/home/jcelerier/Documents/IMG_1929.JPG")});
 }
 
 Model::~Model() {}
 
-void Model::setPath(const QString& f)
+void Model::setImages(const std::vector<Image>& f)
 {
-  if (f == m_path)
-    return;
-
-  m_path = f;
-  m_decoder = std::make_shared<video_decoder>();
-  m_decoder->load(m_path.toStdString(), 60.);
-  pathChanged(f);
+  m_images = f;
+  imagesChanged();
 }
 
 QString Model::prettyName() const noexcept
@@ -61,12 +66,12 @@ QSet<QString> DropHandler::mimeTypes() const noexcept
 
 QSet<QString> LibraryHandler::acceptedFiles() const noexcept
 {
-  return {"mkv", "mov", "mp4", "h264", "avi", "hap", "mpg", "mpeg"};
+  return {"png", "jpg", "jpeg", "gif", "bmp"};
 }
 
 QSet<QString> DropHandler::fileExtensions() const noexcept
 {
-  return {"mkv", "mov", "mp4", "h264", "avi", "hap", "mpg", "mpeg"};
+  return {"png", "jpg", "jpeg", "gif", "bmp"};
 }
 
 std::vector<Process::ProcessDropHandler::ProcessDrop> DropHandler::dropData(
@@ -82,7 +87,7 @@ std::vector<Process::ProcessDropHandler::ProcessDrop> DropHandler::dropData(
       p.setup =
           [str = filename](Process::ProcessModel& m, score::Dispatcher& disp) {
             auto& midi = static_cast<Gfx::Images::Model&>(m);
-            disp.submit(new ChangeImages{midi, str});
+            // TODO disp.submit(new ChangeImages{midi, str});
           };
       vec.push_back(std::move(p));
     }
@@ -92,11 +97,31 @@ std::vector<Process::ProcessDropHandler::ProcessDrop> DropHandler::dropData(
 
 }
 template <>
+void DataStreamReader::read(const Gfx::Image& proc)
+{
+}
+
+template <>
+void DataStreamWriter::write(Gfx::Image& proc)
+{
+}
+
+template <>
+void JSONObjectReader::read(const Gfx::Image& proc)
+{
+}
+
+template <>
+void JSONObjectWriter::write(Gfx::Image& proc)
+{
+}
+
+template <>
 void DataStreamReader::read(const Gfx::Images::Model& proc)
 {
   readPorts(*this, proc.m_inlets, proc.m_outlets);
 
-  m_stream << proc.m_path;
+  m_stream << proc.m_images;
   insertDelimiter();
 }
 
@@ -110,9 +135,7 @@ void DataStreamWriter::write(Gfx::Images::Model& proc)
       proc.m_outlets,
       &proc);
 
-  QString path;
-  m_stream >> path;
-  proc.setPath(path);
+  m_stream >> proc.m_images;
   checkDelimiter();
 }
 
@@ -120,7 +143,7 @@ template <>
 void JSONObjectReader::read(const Gfx::Images::Model& proc)
 {
   readPorts(obj, proc.m_inlets, proc.m_outlets);
-  obj["FilePath"] = proc.m_path;
+  // TODO
 }
 
 template <>
@@ -132,5 +155,5 @@ void JSONObjectWriter::write(Gfx::Images::Model& proc)
       proc.m_inlets,
       proc.m_outlets,
       &proc);
-  proc.setPath(obj["FilePath"].toString());
+  // TODO
 }

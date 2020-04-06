@@ -10,7 +10,7 @@ class ProcessExecutorComponent final
     : public Execution::
           ProcessComponent_T<Gfx::Images::Model, ossia::node_process>
 {
-  COMPONENT_METADATA("d3d610aa-aa6c-40e6-976b-8844cf48c8ce")
+  COMPONENT_METADATA("81e652e2-e369-44d0-9c36-979a369ac465")
 public:
   ProcessExecutorComponent(
       Model& element,

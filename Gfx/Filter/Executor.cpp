@@ -63,6 +63,7 @@ ProcessExecutorComponent::ProcessExecutorComponent(
             );
 
     int i = 0;
+    std::weak_ptr<gfx_exec_node> weak_node = n;
     for (auto& ctl : element.inlets())
     {
       if (auto ctrl = dynamic_cast<Process::ControlInlet*>(ctl))
@@ -71,7 +72,6 @@ ProcessExecutorComponent::ProcessExecutorComponent(
         *p.value = ctrl->value(); // TODO does this make sense ?
         p.changed = true;         // we will send the first value
 
-        std::weak_ptr<gfx_exec_node> weak_node = n;
         QObject::connect(
             ctrl,
             &Process::ControlInlet::valueChanged,

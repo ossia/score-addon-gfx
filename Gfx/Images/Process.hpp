@@ -7,12 +7,10 @@
 #include <score/command/PropertyCommand.hpp>
 
 #include <Gfx/CommandFactory.hpp>
-#include <Gfx/Graph/videodecoder.hpp>
 #include <Gfx/Images/Metadata.hpp>
-#include <Images/VideoDecoder.hpp>
+#include <Gfx/Graph/imagenode.hpp>
 namespace Gfx::Images
 {
-using video_decoder = ::Images::VideoDecoder;
 class Model final : public Process::ProcessModel
 {
   SCORE_SERIALIZE_FRIENDS
@@ -33,15 +31,12 @@ public:
 
   ~Model() override;
 
-  QString path() const noexcept { return m_path; }
-  void setPath(const QString& f);
-  void pathChanged(const QString& f) W_SIGNAL(pathChanged, f);
-  PROPERTY(QString, path READ path WRITE setPath NOTIFY pathChanged)
-
-  const std::shared_ptr<video_decoder>& decoder() const noexcept
-  {
-    return m_decoder;
-  }
+  const std::vector<Image>& images() const noexcept { return m_images; }
+  void setImages(const std::vector<Image>& f);
+  void addImage(const Image& im);
+  void removeImage(int i);
+  void imagesChanged() W_SIGNAL(imagesChanged);
+  PROPERTY(std::vector<Image>, images READ images WRITE setImages NOTIFY imagesChanged)
 
 private:
   QString prettyName() const noexcept override;
@@ -53,22 +48,21 @@ private:
   void setDurationAndGrow(const TimeVal& newDuration) noexcept override;
   void setDurationAndShrink(const TimeVal& newDuration) noexcept override;
 
-  QString m_path;
-  std::shared_ptr<video_decoder> m_decoder;
+  std::vector<Image> m_images;
 };
 
 using ProcessFactory = Process::ProcessFactory_T<Gfx::Images::Model>;
 
 class LibraryHandler final : public Library::LibraryInterface
 {
-  SCORE_CONCRETE("be66d573-571f-4c33-9f60-0791f53c7266")
+  SCORE_CONCRETE("0916759f-a5f6-4870-a96b-4e1e5efe5885")
 
   QSet<QString> acceptedFiles() const noexcept override;
 };
 
 class DropHandler final : public Process::ProcessDropHandler
 {
-  SCORE_CONCRETE("12d1ed39-0fac-43da-8520-b7e32f9fad7d")
+  SCORE_CONCRETE("f37aa176-d8be-45bc-b833-d014efba6157")
 
   QSet<QString> mimeTypes() const noexcept override;
   QSet<QString> fileExtensions() const noexcept override;
@@ -76,8 +70,48 @@ class DropHandler final : public Process::ProcessDropHandler
       const std::vector<DroppedFile>& data,
       const score::DocumentContext& ctx) const noexcept override;
 };
+/*
+class AddImage final : public score::Command
+{
+  SCORE_COMMAND_DECL(
+      CommandFactoryName(),
+      AddImage,
+      "Add Image")
+public:
+  ChangeSpline(
+      const ProcessModel& autom,
+      const ossia::nodes::spline_data& newval)
+      : m_path{autom}, m_old{autom.spline()}, m_new{newval}
+  {
+  }
 
+public:
+  void undo(const score::DocumentContext& ctx) const override
+  {
+    m_path.find(ctx).setSpline(m_old);
+  }
+  void redo(const score::DocumentContext& ctx) const override
+  {
+    m_path.find(ctx).setSpline(m_new);
+  }
+
+protected:
+  void serializeImpl(DataStreamInput& s) const override
+  {
+    s << m_path << m_old << m_new;
+  }
+  void deserializeImpl(DataStreamOutput& s) override
+  {
+    s >> m_path >> m_old >> m_new;
+  }
+
+private:
+  Path<ProcessModel> m_path;
+  ossia::nodes::spline_data m_old, m_new;
+};
+*/
 }
 
-PROPERTY_COMMAND_T(Gfx, ChangeImages, Video::Model::p_path, "Change video")
+W_REGISTER_ARGTYPE(Gfx::Image)
+PROPERTY_COMMAND_T(Gfx, ChangeImages, Images::Model::p_images, "Change images")
 SCORE_COMMAND_DECL_T(Gfx::ChangeImages)

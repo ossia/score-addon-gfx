@@ -9,90 +9,28 @@
 #include <Gfx/GfxApplicationPlugin.hpp>
 #include <Gfx/GfxContext.hpp>
 #include <Gfx/GfxExec.hpp>
-#include <Gfx/Graph/videonode.hpp>
 #include <Gfx/Images/Process.hpp>
+#include <Gfx/Graph/imagenode.hpp>
+#include <Process/Dataflow/Port.hpp>
 
-extern "C"
-{
-#include <libavutil/pixdesc.h>
-}
 namespace Gfx::Images
 {
-class video_node final : public gfx_exec_node
+class image_node final : public gfx_exec_node
 {
 public:
-  video_node(const std::shared_ptr<video_decoder>& dec, GfxExecutionAction& ctx)
+  image_node(const std::vector<Image>& dec, GfxExecutionAction& ctx)
       : gfx_exec_node{ctx}
-      , m_decoder{dec}
   {
-    switch (dec->pixel_format())
-    {
-      case AV_PIX_FMT_YUV420P:
-        id = exec_context->ui->register_node(
-            std::make_unique<YUV420Node>(dec));
-        break;
-      case AV_PIX_FMT_RGB0:
-        id = exec_context->ui->register_node(std::make_unique<RGB0Node>(dec));
-        break;
-      default:
-        qDebug() << "Unhandled pixel format: "
-                 << av_get_pix_fmt_name(dec->pixel_format());
-        break;
-    }
-    dec->seek(0);
+    id = exec_context->ui->register_node(std::make_unique<ImagesNode>(dec));
   }
 
-  ~video_node()
+  ~image_node()
   {
-    m_decoder->seek(0);
     if (id >= 0)
       exec_context->ui->unregister_node(id);
   }
 
-  std::string label() const noexcept override { return "Gfx::video_node"; }
-
-  video_decoder& decoder() const noexcept { return *m_decoder; }
-private:
-  std::shared_ptr<video_decoder> m_decoder;
-};
-
-class video_process : public ossia::node_process
-{
-public:
-  using node_process::node_process;
-
-  void offset_impl(ossia::time_value tv) override
-  {
-    // TODO
-    static_cast<video_node&>(*node).decoder().seek(0);
-  }
-  void transport_impl(ossia::time_value date) override
-  {
-    // TODO
-    static_cast<video_node&>(*node).decoder().seek(0);
-  }
-
-  void state_impl(const ossia::token_request& req)
-  {
-    node->request(req);
-  }
-
-  void start() override
-  {
-    static_cast<video_node&>(*node).decoder().seek(0);
-  }
-  void stop() override
-  {
-    static_cast<video_node&>(*node).decoder().seek(0);
-  }
-  void pause() override
-  {
-
-  }
-  void resume() override
-  {
-
-  }
+  std::string label() const noexcept override { return "Gfx::image_node"; }
 };
 
 ProcessExecutorComponent::ProcessExecutorComponent(
@@ -102,15 +40,26 @@ ProcessExecutorComponent::ProcessExecutorComponent(
     QObject* parent)
     : ProcessComponent_T{element, ctx, id, "gfxExecutorComponent", parent}
 {
-  if(element.decoder())
+  auto n = std::make_shared<image_node>(
+        element.images(), ctx.doc.plugin<DocumentPlugin>().exec);
+
+  for(int i = 0; i < 2; i++)
   {
-    auto n = std::make_shared<video_node>(
-          element.decoder(), ctx.doc.plugin<DocumentPlugin>().exec);
+    auto ctrl = qobject_cast<Process::ControlInlet*>(element.inlets()[i]);
+    auto& p = n->add_control();
+    *p.value = ctrl->value(); // TODO does this make sense ?
+    p.changed = true;         // we will send the first value
 
-    n->root_outputs().push_back(new ossia::value_outlet);
-
-    this->node = n;
-    m_ossia_process = std::make_shared<video_process>(n);
+    QObject::connect(
+          ctrl,
+          &Process::ControlInlet::valueChanged,
+          this,
+          con_unvalidated{ctx, i, n});
   }
+
+  n->root_outputs().push_back(new ossia::value_outlet);
+
+  this->node = n;
+  m_ossia_process = std::make_shared<ossia::node_process>(n);
 }
 }

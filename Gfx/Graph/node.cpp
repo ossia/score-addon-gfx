@@ -48,7 +48,7 @@ void NodeModel::setShaders(QString vert, QString frag)
 
   b.setGeneratedShaders({
       {QShader::SpirvShader, 100},
-      {QShader::GlslShader, 120},
+      {QShader::GlslShader, 330},
       {QShader::HlslShader, QShaderVersion(50)},
       {QShader::MslShader, QShaderVersion(12)},
   });
@@ -108,6 +108,8 @@ void RenderedNode::init(Renderer& renderer)
           break;
         case Types::Vec2:
           m_materialSize += 8;
+          if(m_materialSize % 8 != 0)
+            m_materialSize += 4;
           break;
         case Types::Vec3:
           m_materialSize += 12;
@@ -213,7 +215,7 @@ void RenderedNode::init(Renderer& renderer)
       assert(sampler.texture);
       bindings.push_back(QRhiShaderResourceBinding::sampledTexture(
           binding,
-          QRhiShaderResourceBinding::FragmentStage,
+          QRhiShaderResourceBinding::VertexStage | QRhiShaderResourceBinding::FragmentStage,
           sampler.texture,
           sampler.sampler));
       binding++;
@@ -300,6 +302,28 @@ void RenderedNode::runPass(Renderer& renderer, QRhiCommandBuffer& cb, QRhiResour
 
   cb.endPass();
 }
+
+void RenderedNode::replaceTexture(QRhiSampler* sampler, QRhiTexture* newTexture)
+{
+  std::vector<QRhiShaderResourceBinding> tmp;
+  tmp.assign(m_srb->cbeginBindings(), m_srb->cendBindings());
+  for(QRhiShaderResourceBinding& b : tmp)
+  {
+    if(b.data()->type == QRhiShaderResourceBinding::Type::SampledTexture)
+    {
+      SCORE_ASSERT(b.data()->u.stex.count >= 1);
+      if(b.data()->u.stex.texSamplers[0].sampler == sampler)
+      {
+        b.data()->u.stex.texSamplers[0].tex = newTexture;
+      }
+    }
+  }
+
+  m_srb->release();
+  m_srb->setBindings(tmp.begin(), tmp.end());
+  m_srb->build();
+}
+
 void RenderedNode::release(Renderer& r)
 {
   releaseWithoutRenderTarget(r);

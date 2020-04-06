@@ -25,6 +25,6 @@ private:
 class InspectorFactory final
     : public Process::InspectorWidgetDelegateFactory_T<Model, InspectorWidget>
 {
-  SCORE_CONCRETE("49ae88d5-52be-48e7-9f0f-f1a93d6a83a0")
+  SCORE_CONCRETE("ee98ee2d-f352-4e7a-8a58-bd01a75de0cd")
 };
 }
