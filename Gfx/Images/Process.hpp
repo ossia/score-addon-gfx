@@ -73,7 +73,7 @@ class DropHandler final : public Process::ProcessDropHandler
 /*
 class AddImage final : public score::Command
 {
-  SCORE_COMMAND_DECL(
+  SCORE_ COMMAND_DECL(
       CommandFactoryName(),
       AddImage,
       "Add Image")

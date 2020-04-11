@@ -67,7 +67,7 @@ public:
 
   void render()
   {
-    if (!state.hasSwapChain || m_notExposed || !canRender)
+    if (!state.hasSwapChain || m_notExposed)
     {
       requestUpdate();
       return;
@@ -83,27 +83,55 @@ public:
       m_newlyExposed = false;
     }
 
-    QRhi::FrameOpResult r = state.rhi->beginFrame(state.swapChain, {});
-    if (r == QRhi::FrameOpSwapChainOutOfDate)
+    if(canRender)
     {
-      resizeSwapChain();
-      if (!state.hasSwapChain)
+      QRhi::FrameOpResult r = state.rhi->beginFrame(state.swapChain, {});
+      if (r == QRhi::FrameOpSwapChainOutOfDate)
+      {
+        resizeSwapChain();
+        if (!state.hasSwapChain)
+        {
+          requestUpdate();
+          return;
+        }
+        r = state.rhi->beginFrame(state.swapChain);
+      }
+      if (r != QRhi::FrameOpSuccess)
       {
         requestUpdate();
         return;
       }
-      r = state.rhi->beginFrame(state.swapChain);
+
+      onRender();
+
+      state.rhi->endFrame(state.swapChain, {});
     }
-    if (r != QRhi::FrameOpSuccess)
+    else
     {
-      requestUpdate();
-      return;
+      QRhi::FrameOpResult r = state.rhi->beginFrame(state.swapChain, {});
+      if (r == QRhi::FrameOpSwapChainOutOfDate)
+      {
+        resizeSwapChain();
+        if (!state.hasSwapChain)
+        {
+          requestUpdate();
+          return;
+        }
+        r = state.rhi->beginFrame(state.swapChain);
+      }
+      if (r != QRhi::FrameOpSuccess)
+      {
+        requestUpdate();
+        return;
+      }
+
+      auto buf = state.swapChain->currentFrameCommandBuffer();
+      auto batch = state.rhi->nextResourceUpdateBatch();
+      buf->beginPass(state.swapChain->currentFrameRenderTarget(), Qt::black, {1.0f, 0}, batch);
+      buf->endPass();
+
+      state.rhi->endFrame(state.swapChain, {});
     }
-
-    onRender();
-
-    state.rhi->endFrame(state.swapChain, {});
-
     requestUpdate();
   }
 

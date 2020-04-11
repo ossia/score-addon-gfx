@@ -3,7 +3,6 @@
 #include "graph.hpp"
 #include "nodes.hpp"
 #include "renderstate.hpp"
-#include "videonode.hpp"
 
 #include <memory>
 /*
